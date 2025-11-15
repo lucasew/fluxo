@@ -1,0 +1,47 @@
+# Binaries
+fluxo
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Dependency directories
+vendor/
+
+# Build artifacts
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend
+web/node_modules/
+web/dist/
+web/.vite/
+web/__generated__/
+
+# Data
+*.db
+downloads/
+.fluxo/
+
+# Logs
+*.log
