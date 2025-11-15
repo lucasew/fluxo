@@ -1,0 +1,36 @@
+{
+  "name": "fluxo-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "relay": "relay-compiler"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-relay": "^18.3.0",
+    "relay-runtime": "^18.3.0",
+    "graphql": "^16.10.0",
+    "graphql-ws": "^5.16.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@types/react-relay": "^16.0.6",
+    "@types/relay-runtime": "^18.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "babel-plugin-relay": "^18.3.0",
+    "daisyui": "^5.0.0",
+    "postcss": "^8.5.2",
+    "relay-compiler": "^18.3.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.11",
+    "vite-plugin-relay": "^2.1.0"
+  }
+}
