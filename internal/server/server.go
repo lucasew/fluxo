@@ -26,7 +26,7 @@ type Server struct {
 func New(cfg *config.Config) (*Server, error) {
 	// Create session manager
 	rainCfg := cfg.Torrent.ToRainConfig()
-	manager, err := session.New(rainCfg)
+	manager, err := session.New(*rainCfg)
 	if err != nil {
 		return nil, fmt.Errorf("creating session manager: %w", err)
 	}
