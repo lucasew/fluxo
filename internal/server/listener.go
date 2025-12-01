@@ -96,7 +96,11 @@ func (l *HTTPListener) Stop(ctx context.Context) error {
 }
 
 func (l *HTTPListener) createSchema(resolver *graphql.Resolver) *handler.Server {
-	srv := handler.NewDefaultServer(&graphql.ExecutableSchema{Resolver: resolver})
+	execSchema, err := graphql.NewExecutableSchema(resolver)
+	if err != nil {
+		panic(fmt.Sprintf("failed to create schema: %v", err))
+	}
+	srv := handler.NewDefaultServer(execSchema)
 
 	// Add WebSocket transport for subscriptions
 	srv.AddTransport(transport.Websocket{
