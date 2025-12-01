@@ -16,10 +16,10 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/websocket"
 
-	"github.com/lucasew/fluxo/embed"
 	"github.com/lucasew/fluxo/internal/config"
 	"github.com/lucasew/fluxo/internal/graphql"
 	"github.com/lucasew/fluxo/internal/session"
+	"github.com/lucasew/fluxo/web"
 )
 
 // HTTPListener implements the HTTP/WebSocket listener
@@ -60,7 +60,7 @@ func (l *HTTPListener) Start(ctx context.Context) error {
 		mux.HandleFunc("/", l.proxyToVite)
 	} else {
 		// Serve embedded files in production
-		webFS, err := embed.WebDist()
+		webFS, err := web.WebDist()
 		if err != nil {
 			return fmt.Errorf("accessing embedded files: %w", err)
 		}
