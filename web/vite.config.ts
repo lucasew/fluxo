@@ -4,7 +4,7 @@ import relay from "vite-plugin-relay";
 import tailwind from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [tailwind, react(), relay],
+  plugins: [tailwind(), react(), relay],
   server: {
     port: 5173,
     proxy: {
