@@ -87,9 +87,9 @@ func (w *Watcher) check() {
 func statsChanged(old, new *torrent.Stats) bool {
 	// Compare key fields that change frequently
 	return old.Status != new.Status ||
-		old.BytesCompleted != new.BytesCompleted ||
-		old.DownloadSpeed != new.DownloadSpeed ||
-		old.UploadSpeed != new.UploadSpeed ||
+		old.Bytes.Completed != new.Bytes.Completed ||
+		old.Speed.Download != new.Speed.Download ||
+		old.Speed.Upload != new.Speed.Upload ||
 		old.Peers.Total != new.Peers.Total ||
 		old.Error != new.Error
 }
