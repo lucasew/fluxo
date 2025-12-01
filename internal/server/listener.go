@@ -23,7 +23,7 @@ import (
 	"github.com/lucasew/fluxo/internal/session"
 )
 
-//go:embed ../../web/dist
+//go:embed ../../web/dist/*
 var webDist embed.FS
 
 // HTTPListener implements the HTTP/WebSocket listener
