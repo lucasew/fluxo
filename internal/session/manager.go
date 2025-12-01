@@ -1,7 +1,6 @@
 package session
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/cenkalti/rain/torrent"
@@ -54,12 +53,7 @@ func (m *Manager) AddTorrent(uri string, opts *torrent.AddTorrentOptions) (*torr
 
 // RemoveTorrent removes a torrent
 func (m *Manager) RemoveTorrent(id string) error {
-	t := m.session.GetTorrent(id)
-	if t == nil {
-		return fmt.Errorf("torrent not found: %s", id)
-	}
-
-	if err := t.Remove(); err != nil {
+	if err := m.session.RemoveTorrent(id); err != nil {
 		return err
 	}
 
@@ -148,17 +142,16 @@ func (m *Manager) AddPeer(id, addr string) error {
 	if t == nil {
 		return fmt.Errorf("torrent not found: %s", id)
 	}
-	return t.AddPeers([]string{addr})
+	return t.AddPeer(addr)
 }
 
 // GetPeers returns peers for a torrent
-func (m *Manager) GetPeers(id string) ([]*torrent.Peer, error) {
+func (m *Manager) GetPeers(id string) ([]torrent.Peer, error) {
 	t := m.session.GetTorrent(id)
 	if t == nil {
 		return nil, fmt.Errorf("torrent not found: %s", id)
 	}
-	stats := t.Stats()
-	return stats.Peers, nil
+	return t.Peers(), nil
 }
 
 // StartAll starts all torrents
