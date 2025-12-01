@@ -1,7 +1,6 @@
 export default {
   src: "./src",
-  schema: "../internal/graphql/schema.graphqls",
   language: "typescript",
-  artifactDirectory: "./src/__generated__",
+  schema: "../internal/graphql/schema.graphql",
   exclude: ["**/node_modules/**", "**/__generated__/**"],
 };
