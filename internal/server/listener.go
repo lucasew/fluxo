@@ -2,9 +2,7 @@ package server
 
 import (
 	"context"
-	"embed"
 	"fmt"
-	"io/fs"
 	"log"
 	"net"
 	"net/http"
@@ -18,13 +16,11 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/websocket"
 
+	"github.com/lucasew/fluxo/embed"
 	"github.com/lucasew/fluxo/internal/config"
 	"github.com/lucasew/fluxo/internal/graphql"
 	"github.com/lucasew/fluxo/internal/session"
 )
-
-//go:embed ../../web/dist/*
-var webDist embed.FS
 
 // HTTPListener implements the HTTP/WebSocket listener
 type HTTPListener struct {
@@ -64,7 +60,7 @@ func (l *HTTPListener) Start(ctx context.Context) error {
 		mux.HandleFunc("/", l.proxyToVite)
 	} else {
 		// Serve embedded files in production
-		webFS, err := fs.Sub(webDist, "web/dist")
+		webFS, err := embed.WebDist()
 		if err != nil {
 			return fmt.Errorf("accessing embedded files: %w", err)
 		}
