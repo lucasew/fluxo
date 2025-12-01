@@ -1,13 +1,10 @@
 {
   "src": "./src",
-  "schema": "../internal/graphql/schema.graphqls",
+  "schema": "../internal/graphql/schema.graphql",
   "language": "typescript",
   "artifactDirectory": "./src/__generated__",
   "exclude": ["**/node_modules/**", "**/__generated__/**"],
   "customScalarTypes": {
     "Time": "string"
-  },
-  "schemaExtensions": [
-    "./node_modules/relay-compiler/relay-extensions.graphql"
-  ]
+  }
 }
