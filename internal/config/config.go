@@ -38,9 +38,6 @@ type TorrentConfig struct {
 	RPCHost           string        `mapstructure:"rpc-host"`
 	RPCPort           uint16        `mapstructure:"rpc-port"`
 	MaxOpenFiles      uint          `mapstructure:"max-open-files"`
-	PieceCacheSize    int64         `mapstructure:"piece-cache-size"`
-	ParallelMetadata  int           `mapstructure:"parallel-metadata"`
-	BlocklistEnabled  bool          `mapstructure:"blocklist-enabled"`
 	BlocklistURL      string        `mapstructure:"blocklist-url"`
 	ResumeWriteInterval time.Duration `mapstructure:"resume-write-interval"`
 }
@@ -70,9 +67,6 @@ func DefaultConfig() *Config {
 			RPCHost:           "127.0.0.1",
 			RPCPort:           7245,
 			MaxOpenFiles:      1024,
-			PieceCacheSize:    256 * 1024 * 1024, // 256 MB
-			ParallelMetadata:  2,
-			BlocklistEnabled:  false,
 			BlocklistURL:      "",
 			ResumeWriteInterval: 30 * time.Second,
 		},
@@ -93,11 +87,8 @@ func (c *TorrentConfig) ToRainConfig() *torrent.Config {
 		PEXEnabled:        c.PEXEnabled,
 		RPCEnabled:        c.RPCEnabled,
 		RPCHost:           c.RPCHost,
-		RPCPort:           c.RPCPort,
-		MaxOpenFiles:      c.MaxOpenFiles,
-		PieceCacheSize:    c.PieceCacheSize,
-		ParallelMetadata:  c.ParallelMetadata,
-		BlocklistEnabled:  c.BlocklistEnabled,
+		RPCPort:           int(c.RPCPort),
+		MaxOpenFiles:      uint64(c.MaxOpenFiles),
 		BlocklistURL:      c.BlocklistURL,
 		ResumeWriteInterval: c.ResumeWriteInterval,
 	}

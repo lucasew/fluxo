@@ -14,7 +14,7 @@ type Manager struct {
 }
 
 // New creates a new session manager
-func New(cfg *torrent.Config) (*Manager, error) {
+func New(cfg torrent.Config) (*Manager, error) {
 	session, err := torrent.NewSession(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("creating session: %w", err)
@@ -54,9 +54,9 @@ func (m *Manager) AddTorrent(uri string, opts *torrent.AddTorrentOptions) (*torr
 
 // RemoveTorrent removes a torrent
 func (m *Manager) RemoveTorrent(id string) error {
-	t, err := m.session.GetTorrent(id)
-	if err != nil {
-		return err
+	t := m.session.GetTorrent(id)
+	if t == nil {
+		return fmt.Errorf("torrent not found: %s", id)
 	}
 
 	if err := t.Remove(); err != nil {
@@ -74,7 +74,11 @@ func (m *Manager) RemoveTorrent(id string) error {
 
 // GetTorrent returns a torrent by ID
 func (m *Manager) GetTorrent(id string) (*torrent.Torrent, error) {
-	return m.session.GetTorrent(id)
+	t := m.session.GetTorrent(id)
+	if t == nil {
+		return nil, fmt.Errorf("torrent not found: %s", id)
+	}
+	return t, nil
 }
 
 // GetTorrents returns all torrents
@@ -95,35 +99,35 @@ func (m *Manager) Close() error {
 
 // StartTorrent starts a torrent
 func (m *Manager) StartTorrent(id string) error {
-	t, err := m.session.GetTorrent(id)
-	if err != nil {
-		return err
+	t := m.session.GetTorrent(id)
+	if t == nil {
+		return fmt.Errorf("torrent not found: %s", id)
 	}
 	return t.Start()
 }
 
 // StopTorrent stops a torrent
 func (m *Manager) StopTorrent(id string) error {
-	t, err := m.session.GetTorrent(id)
-	if err != nil {
-		return err
+	t := m.session.GetTorrent(id)
+	if t == nil {
+		return fmt.Errorf("torrent not found: %s", id)
 	}
 	return t.Stop()
 }
 
 // VerifyTorrent verifies a torrent's data
 func (m *Manager) VerifyTorrent(id string) error {
-	t, err := m.session.GetTorrent(id)
-	if err != nil {
-		return err
+	t := m.session.GetTorrent(id)
+	if t == nil {
+		return fmt.Errorf("torrent not found: %s", id)
 	}
 	return t.Verify()
 }
 
 // AnnounceTorrent forces an announce to trackers
 func (m *Manager) AnnounceTorrent(id string) {
-	t, err := m.session.GetTorrent(id)
-	if err != nil {
+	t := m.session.GetTorrent(id)
+	if t == nil {
 		return
 	}
 	t.Announce()
@@ -131,27 +135,27 @@ func (m *Manager) AnnounceTorrent(id string) {
 
 // AddTracker adds a tracker to a torrent
 func (m *Manager) AddTracker(id, url string) error {
-	t, err := m.session.GetTorrent(id)
-	if err != nil {
-		return err
+	t := m.session.GetTorrent(id)
+	if t == nil {
+		return fmt.Errorf("torrent not found: %s", id)
 	}
 	return t.AddTracker(url)
 }
 
 // AddPeer adds a peer to a torrent
 func (m *Manager) AddPeer(id, addr string) error {
-	t, err := m.session.GetTorrent(id)
-	if err != nil {
-		return err
+	t := m.session.GetTorrent(id)
+	if t == nil {
+		return fmt.Errorf("torrent not found: %s", id)
 	}
 	return t.AddPeers([]string{addr})
 }
 
 // GetPeers returns peers for a torrent
 func (m *Manager) GetPeers(id string) ([]*torrent.Peer, error) {
-	t, err := m.session.GetTorrent(id)
-	if err != nil {
-		return nil, err
+	t := m.session.GetTorrent(id)
+	if t == nil {
+		return nil, fmt.Errorf("torrent not found: %s", id)
 	}
 	stats := t.Stats()
 	return stats.Peers, nil
