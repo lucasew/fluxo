@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
-	"io/fs"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -116,7 +116,7 @@ func (l *HTTPListener) Start(ctx context.Context) error {
 		Addr:         addr,
 		Handler:      l.withMiddleware(mux),
 		ReadTimeout:  30 * time.Second,
-		WriteTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
 		BaseContext:  func(net.Listener) context.Context { return ctx },
 	}
 
