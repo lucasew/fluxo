@@ -1,39 +1,33 @@
 import { Suspense } from 'react'
-import TorrentList from './components/TorrentList'
-import StatsBar from './components/StatsBar'
-import AddTorrentModal from './components/AddTorrentModal'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import Layout from './Layout'
+import Home from './pages/Home'
+import TorrentDetail from './pages/TorrentDetail'
+import AddTorrent from './pages/AddTorrent'
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout />,
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: 'torrent/:id',
+        element: <TorrentDetail />,
+      },
+      {
+        path: 'add',
+        element: <AddTorrent />,
+      },
+    ],
+  },
+])
 
 function App() {
-  return (
-    <div className="min-h-screen bg-base-200">
-      {/* Navbar */}
-      <div className="navbar bg-base-100 shadow-lg">
-        <div className="flex-1">
-          <a className="btn btn-ghost text-xl">Fluxo</a>
-        </div>
-        <div className="flex-none">
-          <label htmlFor="add-torrent-modal" className="btn btn-primary">
-            Add Torrent
-          </label>
-        </div>
-      </div>
-
-      {/* Stats Bar */}
-      <Suspense fallback={<div className="loading loading-spinner loading-lg"></div>}>
-        <StatsBar />
-      </Suspense>
-
-      {/* Main Content */}
-      <div className="container mx-auto p-4">
-        <Suspense fallback={<div className="loading loading-spinner loading-lg"></div>}>
-          <TorrentList />
-        </Suspense>
-      </div>
-
-      {/* Add Torrent Modal */}
-      <AddTorrentModal />
-    </div>
-  )
+  return <RouterProvider router={router} />
 }
 
 export default App

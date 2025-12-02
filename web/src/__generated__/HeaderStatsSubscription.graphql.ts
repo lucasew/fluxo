@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<0411ab216f792469c23bff0e143b9e35>>
+ * @generated SignedSource<<dfa0c855fce8c9c34901d80982d49811>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,17 +9,17 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type StatsBarSubscription$variables = Record<PropertyKey, never>;
-export type StatsBarSubscription$data = {
-  readonly statsUpdated: {
-    readonly peers: number;
-    readonly portsAvailable: number;
-    readonly torrents: number;
+export type HeaderStatsSubscription$variables = Record<PropertyKey, never>;
+export type HeaderStatsSubscription$data = {
+  readonly torrentUpdated: {
+    readonly downloadSpeed: number;
+    readonly id: string;
+    readonly uploadSpeed: number;
   };
 };
-export type StatsBarSubscription = {
-  response: StatsBarSubscription$data;
-  variables: StatsBarSubscription$variables;
+export type HeaderStatsSubscription = {
+  response: HeaderStatsSubscription$data;
+  variables: HeaderStatsSubscription$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -27,30 +27,30 @@ var v0 = [
   {
     "alias": null,
     "args": null,
-    "concreteType": "SessionStats",
+    "concreteType": "Torrent",
     "kind": "LinkedField",
-    "name": "statsUpdated",
+    "name": "torrentUpdated",
     "plural": false,
     "selections": [
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "torrents",
+        "name": "id",
         "storageKey": null
       },
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "peers",
+        "name": "downloadSpeed",
         "storageKey": null
       },
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "portsAvailable",
+        "name": "uploadSpeed",
         "storageKey": null
       }
     ],
@@ -62,7 +62,7 @@ return {
     "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
-    "name": "StatsBarSubscription",
+    "name": "HeaderStatsSubscription",
     "selections": (v0/*: any*/),
     "type": "Subscription",
     "abstractKey": null
@@ -71,20 +71,20 @@ return {
   "operation": {
     "argumentDefinitions": [],
     "kind": "Operation",
-    "name": "StatsBarSubscription",
+    "name": "HeaderStatsSubscription",
     "selections": (v0/*: any*/)
   },
   "params": {
-    "cacheID": "e8462f39b92383801adcee0eb5397419",
+    "cacheID": "82a556005937c00b74c940d916396dd8",
     "id": null,
     "metadata": {},
-    "name": "StatsBarSubscription",
+    "name": "HeaderStatsSubscription",
     "operationKind": "subscription",
-    "text": "subscription StatsBarSubscription {\n  statsUpdated {\n    torrents\n    peers\n    portsAvailable\n  }\n}\n"
+    "text": "subscription HeaderStatsSubscription {\n  torrentUpdated {\n    id\n    downloadSpeed\n    uploadSpeed\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "ddd27cb1173aa4c7b69ff4ae7469558a";
+(node as any).hash = "31827780c12452ac197119bea7fe10a7";
 
 export default node;
