@@ -3,11 +3,13 @@ package server
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"log"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -59,12 +61,53 @@ func (l *HTTPListener) Start(ctx context.Context) error {
 		// Proxy to Vite dev server in dev mode
 		mux.HandleFunc("/", l.proxyToVite)
 	} else {
-		// Serve embedded files in production
+		// Serve embedded files in production with SPA catch-all
 		webFS, err := web.WebDist()
 		if err != nil {
 			return fmt.Errorf("accessing embedded files: %w", err)
 		}
-		mux.Handle("/", http.FileServer(http.FS(webFS)))
+
+		fileServer := http.FileServer(http.FS(webFS))
+
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			// Check if file exists in FS
+			f, err := webFS.Open(strings.TrimPrefix(r.URL.Path, "/"))
+			if err == nil {
+				defer f.Close()
+				stat, err := f.Stat()
+				if err == nil && !stat.IsDir() {
+					fileServer.ServeHTTP(w, r)
+					return
+				}
+			} else if !strings.HasPrefix(r.URL.Path, "/graphql") && !strings.HasPrefix(r.URL.Path, "/api") {
+				// Fallback to index.html for SPA routes, unless it's an API call
+				// (Though checking prefix here is a safeguard, the mux router prioritizes exact/prefix matches if registered.
+				// But since we use mux.HandleFunc("/", ...), it matches everything not matched by others.)
+
+				// Serve index.html
+				index, err := webFS.Open("index.html")
+				if err != nil {
+					http.Error(w, "index.html not found", http.StatusInternalServerError)
+					return
+				}
+				defer index.Close()
+
+				// Get stat for ModTime
+				stat, err := index.Stat()
+				if err != nil {
+					http.Error(w, "index.html stat failed", http.StatusInternalServerError)
+					return
+				}
+
+				http.ServeContent(w, r, "index.html", stat.ModTime(), index.(io.ReadSeeker))
+				return
+			}
+
+			// Default 404 for other cases (like /api/unknown) handled by fileServer usually, but here we might want explicit logic.
+			// Actually fileServer handles directory listings or 404s.
+			// But since we intercepted above, we only fallback to index.html for non-API routes.
+			fileServer.ServeHTTP(w, r)
+		})
 	}
 
 	// Create server
@@ -73,7 +116,7 @@ func (l *HTTPListener) Start(ctx context.Context) error {
 		Addr:         addr,
 		Handler:      l.withMiddleware(mux),
 		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		WriteTimeout:  30 * time.Second,
 		BaseContext:  func(net.Listener) context.Context { return ctx },
 	}
 

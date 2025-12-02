@@ -34,15 +34,15 @@ export default function HeaderStats() {
   const totalUpload = data.torrents.reduce((acc, t) => acc + t.uploadSpeed, 0);
 
   return (
-    <>
-        <div className="flex items-center gap-1">
-            <ArrowDown size={14} className="text-success" />
-            <span>{formatSpeed(totalDownload)}</span>
-        </div>
-        <div className="flex items-center gap-1">
-            <ArrowUp size={14} className="text-info" />
+    <div className="flex flex-col text-[10px] sm:text-xs leading-none gap-0.5 min-w-[80px]">
+        <div className="flex items-center justify-end gap-1 text-info">
             <span>{formatSpeed(totalUpload)}</span>
+            <ArrowUp size={12} />
         </div>
-    </>
+        <div className="flex items-center justify-end gap-1 text-success">
+            <span>{formatSpeed(totalDownload)}</span>
+            <ArrowDown size={12} />
+        </div>
+    </div>
   );
 }
