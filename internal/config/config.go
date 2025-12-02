@@ -25,23 +25,23 @@ type Config struct {
 
 // TorrentConfig wraps Rain's config with our custom defaults
 type TorrentConfig struct {
-	Database          string        `mapstructure:"database"`
-	DataDir           string        `mapstructure:"data-dir"`
-	DataDirIncludesTorrentID bool   `mapstructure:"data-dir-includes-torrent-id"`
-	PortBegin         uint16        `mapstructure:"port-begin"`
-	PortEnd           uint16        `mapstructure:"port-end"`
-	DHTEnabled        bool          `mapstructure:"dht-enabled"`
-	DHTPort           uint16        `mapstructure:"dht-port"`
-	DHTHost           string        `mapstructure:"dht-host"`
-	PEXEnabled        bool          `mapstructure:"pex-enabled"`
-	RPCEnabled        bool          `mapstructure:"rpc-enabled"`
-	RPCHost           string        `mapstructure:"rpc-host"`
-	RPCPort           uint16        `mapstructure:"rpc-port"`
-	MaxOpenFiles      uint          `mapstructure:"max-open-files"`
-	BlocklistURL      string        `mapstructure:"blocklist-url"`
-	ResumeWriteInterval time.Duration `mapstructure:"resume-write-interval"`
-	HealthCheckInterval time.Duration `mapstructure:"health-check-interval"`
-	HealthCheckTimeout  time.Duration `mapstructure:"health-check-timeout"`
+	Database                 string        `mapstructure:"database"`
+	DataDir                  string        `mapstructure:"data-dir"`
+	DataDirIncludesTorrentID bool          `mapstructure:"data-dir-includes-torrent-id"`
+	PortBegin                uint16        `mapstructure:"port-begin"`
+	PortEnd                  uint16        `mapstructure:"port-end"`
+	DHTEnabled               bool          `mapstructure:"dht-enabled"`
+	DHTPort                  uint16        `mapstructure:"dht-port"`
+	DHTHost                  string        `mapstructure:"dht-host"`
+	PEXEnabled               bool          `mapstructure:"pex-enabled"`
+	RPCEnabled               bool          `mapstructure:"rpc-enabled"`
+	RPCHost                  string        `mapstructure:"rpc-host"`
+	RPCPort                  uint16        `mapstructure:"rpc-port"`
+	MaxOpenFiles             uint          `mapstructure:"max-open-files"`
+	BlocklistURL             string        `mapstructure:"blocklist-url"`
+	ResumeWriteInterval      time.Duration `mapstructure:"resume-write-interval"`
+	HealthCheckInterval      time.Duration `mapstructure:"health-check-interval"`
+	HealthCheckTimeout       time.Duration `mapstructure:"health-check-timeout"`
 }
 
 // DefaultConfig returns the default configuration
@@ -56,48 +56,49 @@ func DefaultConfig() *Config {
 		DevProxy:      "http://localhost:5173",
 		WatchInterval: 1 * time.Second,
 		Torrent: TorrentConfig{
-			Database:          homeDir + "/.fluxo/session.db",
-			DataDir:           homeDir + "/.fluxo/downloads",
+			Database:                 homeDir + "/.fluxo/session.db",
+			DataDir:                  homeDir + "/.fluxo/downloads",
 			DataDirIncludesTorrentID: false,
-			PortBegin:         50000,
-			PortEnd:           60000,
-			DHTEnabled:        true,
-			DHTPort:           7246,
-			DHTHost:           "0.0.0.0",
-			PEXEnabled:        true,
-			RPCEnabled:        false,
-			RPCHost:           "127.0.0.1",
-			RPCPort:           7245,
-			MaxOpenFiles:      1024,
-			BlocklistURL:      "",
-			ResumeWriteInterval: 30 * time.Second,
-			HealthCheckInterval: 30 * time.Second,
-			HealthCheckTimeout:  5 * time.Minute,
+			PortBegin:                50000,
+			PortEnd:                  60000,
+			DHTEnabled:               true,
+			DHTPort:                  7246,
+			DHTHost:                  "0.0.0.0",
+			PEXEnabled:               true,
+			RPCEnabled:               false,
+			RPCHost:                  "127.0.0.1",
+			RPCPort:                  7245,
+			MaxOpenFiles:             1024,
+			BlocklistURL:             "",
+			ResumeWriteInterval:      30 * time.Second,
+			HealthCheckInterval:      30 * time.Second,
+			HealthCheckTimeout:       5 * time.Minute,
 		},
 	}
 }
 
 // ToRainConfig converts TorrentConfig to Rain's torrent.Config
 func (c *TorrentConfig) ToRainConfig() *torrent.Config {
-	return &torrent.Config{
-		Database:          c.Database,
-		DataDir:           c.DataDir,
-		DataDirIncludesTorrentID: c.DataDirIncludesTorrentID,
-		PortBegin:         c.PortBegin,
-		PortEnd:           c.PortEnd,
-		DHTEnabled:        c.DHTEnabled,
-		DHTPort:           c.DHTPort,
-		DHTHost:           c.DHTHost,
-		PEXEnabled:        c.PEXEnabled,
-		RPCEnabled:        c.RPCEnabled,
-		RPCHost:           c.RPCHost,
-		RPCPort:           int(c.RPCPort),
-		MaxOpenFiles:      uint64(c.MaxOpenFiles),
-		BlocklistURL:      c.BlocklistURL,
-		ResumeWriteInterval: c.ResumeWriteInterval,
-		HealthCheckInterval: c.HealthCheckInterval,
-		HealthCheckTimeout:  c.HealthCheckTimeout,
-	}
+	config := torrent.DefaultConfig
+	config.Database = c.Database
+
+	config.DataDir = c.DataDir
+	config.DataDirIncludesTorrentID = c.DataDirIncludesTorrentID
+	config.PortBegin = c.PortBegin
+	config.PortEnd = c.PortEnd
+	config.DHTEnabled = c.DHTEnabled
+	config.DHTPort = c.DHTPort
+	config.DHTHost = c.DHTHost
+	config.PEXEnabled = c.PEXEnabled
+	config.RPCEnabled = c.RPCEnabled
+	config.RPCHost = c.RPCHost
+	config.RPCPort = int(c.RPCPort)
+	config.MaxOpenFiles = uint64(c.MaxOpenFiles)
+	config.BlocklistURL = c.BlocklistURL
+	config.ResumeWriteInterval = c.ResumeWriteInterval
+	config.HealthCheckInterval = c.HealthCheckInterval
+	config.HealthCheckTimeout = c.HealthCheckTimeout
+	return &config
 }
 
 func getHomeDir() string {
