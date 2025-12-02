@@ -26,7 +26,7 @@ func (r *mutationResolver) AddTorrent(ctx context.Context, input AddTorrentInput
 		opts.StopAfterMetadata = *input.StopAfterMetadata
 	}
 
-	t, err := r.manager.AddTorrent(input.URI, opts)
+	t, err := r.manager.AddTorrentFromInput(input.URI, input.TorrentData, opts)
 	if err != nil {
 		return nil, fmt.Errorf("adding torrent: %w", err)
 	}

@@ -11,10 +11,11 @@ import (
 )
 
 type AddTorrentInput struct {
-	URI               string `json:"uri"`
-	Stopped           *bool  `json:"stopped,omitempty"`
-	StopAfterDownload *bool  `json:"stopAfterDownload,omitempty"`
-	StopAfterMetadata *bool  `json:"stopAfterMetadata,omitempty"`
+	URI               *string `json:"uri,omitempty"`
+	TorrentData       *string `json:"torrentData,omitempty"`
+	Stopped           *bool   `json:"stopped,omitempty"`
+	StopAfterDownload *bool   `json:"stopAfterDownload,omitempty"`
+	StopAfterMetadata *bool   `json:"stopAfterMetadata,omitempty"`
 }
 
 type File struct {

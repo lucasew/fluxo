@@ -5931,7 +5931,7 @@ func (ec *executionContext) unmarshalInputAddTorrentInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"uri", "stopped", "stopAfterDownload", "stopAfterMetadata"}
+	fieldsInOrder := [...]string{"uri", "torrentData", "stopped", "stopAfterDownload", "stopAfterMetadata"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5940,11 +5940,18 @@ func (ec *executionContext) unmarshalInputAddTorrentInput(ctx context.Context, o
 		switch k {
 		case "uri":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uri"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.URI = data
+		case "torrentData":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("torrentData"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TorrentData = data
 		case "stopped":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("stopped"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)

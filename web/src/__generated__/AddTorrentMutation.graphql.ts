@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<ce0b5233147c38f647f1e4291d5bc660>>
+ * @generated SignedSource<<68c2b73b502db71c17e548e50474b8b6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,7 +13,8 @@ export type AddTorrentInput = {
   stopAfterDownload?: boolean | null | undefined;
   stopAfterMetadata?: boolean | null | undefined;
   stopped?: boolean | null | undefined;
-  uri: string;
+  torrentData?: string | null | undefined;
+  uri?: string | null | undefined;
 };
 export type AddTorrentMutation$variables = {
   input: AddTorrentInput;

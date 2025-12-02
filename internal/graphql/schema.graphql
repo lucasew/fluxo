@@ -148,7 +148,8 @@ type SessionStats {
 }
 
 input AddTorrentInput {
-    uri: String!
+    uri: String
+    torrentData: String
     stopped: Boolean
     stopAfterDownload: Boolean
     stopAfterMetadata: Boolean

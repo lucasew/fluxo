@@ -36,7 +36,8 @@ export default function AddTorrent() {
     setError(null);
     setIsProcessing(true);
 
-    let uriToAdd = '';
+    let uriToAdd: string | undefined = undefined;
+    let torrentData: string | undefined = undefined;
 
     try {
         if (activeTab === 'magnet') {
@@ -45,16 +46,16 @@ export default function AddTorrent() {
         } else {
             if (!file) throw new Error('File is required');
 
-            // Read file
+            // Read file as base64 to preserve metadata
             const arrayBuffer = await file.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
 
             try {
-                // Parse torrent file
-                // IMPORTANT: parse-torrent default export is the function, named export has toMagnetURI
+                // Validate it's a valid torrent file by parsing it
+                await parseTorrent(buffer);
 
-                const parsed = await parseTorrent(buffer);
-                uriToAdd = toMagnetURI(parsed);
+                // Send the raw torrent file as base64 (preserves metadata)
+                torrentData = buffer.toString('base64');
             } catch (err) {
                 console.error(err);
                 throw new Error('Invalid .torrent file: ' + (err instanceof Error ? err.message : String(err)));
@@ -65,6 +66,7 @@ export default function AddTorrent() {
             variables: {
                 input: {
                     uri: uriToAdd,
+                    torrentData: torrentData,
                 }
             },
             onCompleted: (response, errors) => {

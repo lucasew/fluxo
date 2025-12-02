@@ -1,6 +1,8 @@
 package session
 
 import (
+	"bytes"
+	"encoding/base64"
 	"fmt"
 
 	"github.com/cenkalti/rain/torrent"
@@ -45,6 +47,51 @@ func (m *Manager) AddTorrent(uri string, opts *torrent.AddTorrentOptions) (*torr
 	if err != nil {
 		// Wrap URI parsing errors
 		return nil, fmt.Errorf("%w: %v", ErrInvalidURI, err)
+	}
+
+	// Publish event
+	m.eventBus.Publish(Event{
+		Type:    EventTorrentAdded,
+		Torrent: t,
+	})
+
+	return t, nil
+}
+
+// AddTorrentFromInput adds a torrent from either URI or torrent data (base64)
+func (m *Manager) AddTorrentFromInput(uri *string, torrentData *string, opts *torrent.AddTorrentOptions) (*torrent.Torrent, error) {
+	var t *torrent.Torrent
+	var err error
+
+	// Validate that at least one input is provided
+	if (uri == nil || *uri == "") && (torrentData == nil || *torrentData == "") {
+		return nil, fmt.Errorf("%w: either uri or torrentData must be provided", ErrInvalidURI)
+	}
+
+	// Validate that only one input is provided
+	if uri != nil && *uri != "" && torrentData != nil && *torrentData != "" {
+		return nil, fmt.Errorf("%w: only one of uri or torrentData can be provided", ErrInvalidURI)
+	}
+
+	// If torrentData is provided, use AddTorrent (preserves metadata)
+	if torrentData != nil && *torrentData != "" {
+		// Decode base64
+		decoded, err := base64.StdEncoding.DecodeString(*torrentData)
+		if err != nil {
+			return nil, fmt.Errorf("%w: failed to decode torrent data: %v", ErrInvalidURI, err)
+		}
+
+		// Use AddTorrent with io.Reader
+		t, err = m.session.AddTorrent(bytes.NewReader(decoded), opts)
+		if err != nil {
+			return nil, fmt.Errorf("adding torrent from data: %w", err)
+		}
+	} else {
+		// Use AddURI (for magnet links or HTTP URLs)
+		t, err = m.session.AddURI(*uri, opts)
+		if err != nil {
+			return nil, fmt.Errorf("%w: %v", ErrInvalidURI, err)
+		}
 	}
 
 	// Publish event
