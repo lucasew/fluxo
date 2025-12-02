@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<8c2476579fa8feda2739e59aa893c13d>>
+ * @generated SignedSource<<ce0b5233147c38f647f1e4291d5bc660>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,18 +15,18 @@ export type AddTorrentInput = {
   stopped?: boolean | null | undefined;
   uri: string;
 };
-export type AddTorrentModalMutation$variables = {
+export type AddTorrentMutation$variables = {
   input: AddTorrentInput;
 };
-export type AddTorrentModalMutation$data = {
+export type AddTorrentMutation$data = {
   readonly addTorrent: {
     readonly id: string;
     readonly name: string;
   };
 };
-export type AddTorrentModalMutation = {
-  response: AddTorrentModalMutation$data;
-  variables: AddTorrentModalMutation$variables;
+export type AddTorrentMutation = {
+  response: AddTorrentMutation$data;
+  variables: AddTorrentMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -75,7 +75,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "AddTorrentModalMutation",
+    "name": "AddTorrentMutation",
     "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -84,20 +84,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "AddTorrentModalMutation",
+    "name": "AddTorrentMutation",
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "1cf3cddfcd4fb71429635642794d1389",
+    "cacheID": "457d0182956587ad9b0435d1f407f69b",
     "id": null,
     "metadata": {},
-    "name": "AddTorrentModalMutation",
+    "name": "AddTorrentMutation",
     "operationKind": "mutation",
-    "text": "mutation AddTorrentModalMutation(\n  $input: AddTorrentInput!\n) {\n  addTorrent(input: $input) {\n    id\n    name\n  }\n}\n"
+    "text": "mutation AddTorrentMutation(\n  $input: AddTorrentInput!\n) {\n  addTorrent(input: $input) {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "bf68ff9ef1d2de673aad7d3ab2c370bd";
+(node as any).hash = "078df9fc4c9d7b2333960f60392c124f";
 
 export default node;

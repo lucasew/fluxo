@@ -5,6 +5,15 @@ import tailwind from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [tailwind(), react(), relay],
+  define: {
+    // Polyfill for parse-torrent/bencode
+    'global': {},
+  },
+  resolve: {
+    alias: {
+      buffer: 'buffer',
+    }
+  },
   server: {
     port: 5173,
     proxy: {
@@ -19,4 +28,11 @@ export default defineConfig({
     outDir: "dist",
     emptyOutDir: true,
   },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis'
+      }
+    }
+  }
 });
