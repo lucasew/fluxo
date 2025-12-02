@@ -40,6 +40,8 @@ type TorrentConfig struct {
 	MaxOpenFiles      uint          `mapstructure:"max-open-files"`
 	BlocklistURL      string        `mapstructure:"blocklist-url"`
 	ResumeWriteInterval time.Duration `mapstructure:"resume-write-interval"`
+	HealthCheckInterval time.Duration `mapstructure:"health-check-interval"`
+	HealthCheckTimeout  time.Duration `mapstructure:"health-check-timeout"`
 }
 
 // DefaultConfig returns the default configuration
@@ -69,6 +71,8 @@ func DefaultConfig() *Config {
 			MaxOpenFiles:      1024,
 			BlocklistURL:      "",
 			ResumeWriteInterval: 30 * time.Second,
+			HealthCheckInterval: 30 * time.Second,
+			HealthCheckTimeout:  5 * time.Minute,
 		},
 	}
 }
@@ -91,6 +95,8 @@ func (c *TorrentConfig) ToRainConfig() *torrent.Config {
 		MaxOpenFiles:      uint64(c.MaxOpenFiles),
 		BlocklistURL:      c.BlocklistURL,
 		ResumeWriteInterval: c.ResumeWriteInterval,
+		HealthCheckInterval: c.HealthCheckInterval,
+		HealthCheckTimeout:  c.HealthCheckTimeout,
 	}
 }
 

@@ -42,4 +42,6 @@ func AddFlags(cmd *cobra.Command) {
 	flags.Bool("blocklist-enabled", false, "enable peer blocklist")
 	flags.String("blocklist-url", "", "URL to download blocklist from")
 	flags.Duration("resume-write-interval", 30*time.Second, "interval to write resume data")
+	flags.Duration("health-check-interval", 30*time.Second, "interval to check torrent health")
+	flags.Duration("health-check-timeout", 5*time.Minute, "timeout before crashing on unresponsive torrent")
 }
