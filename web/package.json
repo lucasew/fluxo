@@ -18,6 +18,7 @@
     "graphql-ws": "^6.0.6",
     "lucide-react": "^0.555.0",
     "parse-torrent": "^11.0.19",
+    "path-browserify": "^1.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-relay": "^20.1.1",

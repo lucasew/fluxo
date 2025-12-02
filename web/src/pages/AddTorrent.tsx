@@ -4,7 +4,7 @@ import { graphql } from 'relay-runtime';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, Link as LinkIcon, FileText } from 'lucide-react';
 // @ts-ignore
-import parseTorrent from 'parse-torrent';
+import parseTorrent, { toMagnetURI } from 'parse-torrent';
 import { Buffer } from 'buffer';
 
 // Ensure Buffer is available globally for parse-torrent if needed
@@ -51,16 +51,13 @@ export default function AddTorrent() {
 
             try {
                 // Parse torrent file
-                const parsed = parseTorrent(buffer);
-                // Convert back to magnet URI as the backend supports adding by URI (magnet)
-                // If backend supports raw torrent file upload, we'd use a different mutation or input.
-                // The prompt says: "na tela de adicionar torrent dá opção do usuário upar um magnet e se não precisar mexer no backend bota suporte pra upar .torrent também"
-                // "como .torrent é bencode dá pra decodificar os dados de lá e converter .torrent pra bencode mas só faz isso se for trivial"
-                // parse-torrent can convert buffer to magnet uri easily.
-                uriToAdd = parseTorrent.toMagnetURI(parsed);
+                // IMPORTANT: parse-torrent default export is the function, named export has toMagnetURI
+
+                const parsed = await parseTorrent(buffer);
+                uriToAdd = toMagnetURI(parsed);
             } catch (err) {
                 console.error(err);
-                throw new Error('Invalid .torrent file');
+                throw new Error('Invalid .torrent file: ' + (err instanceof Error ? err.message : String(err)));
             }
         }
 
