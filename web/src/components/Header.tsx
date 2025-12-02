@@ -1,19 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Plus, Moon, Sun } from 'lucide-react';
-import { useState, useEffect, Suspense } from 'react';
+import { Suspense } from 'react';
 import HeaderStats from './HeaderStats';
 
 export default function Header() {
-  const [theme, setTheme] = useState('dark');
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(t => t === 'dark' ? 'light' : 'dark');
-  };
-
   return (
     <div className="navbar bg-base-100 shadow-lg sticky top-0 z-50">
       <div className="flex-1 gap-2">
@@ -39,9 +29,16 @@ export default function Header() {
           <span className="hidden md:inline">Add Torrent</span>
         </Link>
 
-        <button className="btn btn-ghost btn-circle" onClick={toggleTheme}>
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
+        <label className="swap swap-rotate btn btn-ghost btn-circle">
+          {/* this hidden checkbox controls the state */}
+          <input type="checkbox" className="theme-controller" value="light" />
+
+          {/* sun icon */}
+          <Sun className="swap-on fill-current w-6 h-6" />
+
+          {/* moon icon */}
+          <Moon className="swap-off fill-current w-6 h-6" />
+        </label>
       </div>
     </div>
   );
