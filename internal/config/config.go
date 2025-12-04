@@ -19,6 +19,10 @@ type Config struct {
 	// Watcher settings
 	WatchInterval time.Duration `mapstructure:"watch-interval"`
 
+	// UPnP settings
+	UPnPEnabled     bool   `mapstructure:"upnp-enabled"`
+	UPnPDescription string `mapstructure:"upnp-description"`
+
 	// Rain torrent config (embedded)
 	Torrent TorrentConfig `mapstructure:",squash"`
 }
@@ -49,12 +53,14 @@ func DefaultConfig() *Config {
 	homeDir := getHomeDir()
 
 	return &Config{
-		APIPort:       8080,
-		APIHost:       "127.0.0.1",
-		Debug:         false,
-		DevMode:       false,
-		DevProxy:      "http://localhost:5173",
-		WatchInterval: 1 * time.Second,
+		APIPort:         8080,
+		APIHost:         "127.0.0.1",
+		Debug:           false,
+		DevMode:         false,
+		DevProxy:        "http://localhost:5173",
+		WatchInterval:   1 * time.Second,
+		UPnPEnabled:     true,
+		UPnPDescription: "Fluxo BitTorrent Client",
 		Torrent: TorrentConfig{
 			Database:                 homeDir + "/.fluxo/session.db",
 			DataDir:                  homeDir + "/.fluxo/downloads",

@@ -23,6 +23,10 @@ func AddFlags(cmd *cobra.Command) {
 	// Watcher settings
 	flags.Duration("watch-interval", 1*time.Second, "torrent watch interval")
 
+	// UPnP settings
+	flags.Bool("upnp-enabled", true, "enable UPnP port forwarding")
+	flags.String("upnp-description", "Fluxo BitTorrent Client", "UPnP port mapping description")
+
 	// Rain/Torrent settings
 	flags.String("database", "", "path to session database")
 	flags.String("data-dir", "", "path to downloads directory")

@@ -8,14 +8,16 @@ import (
 
 	"github.com/lucasew/fluxo/internal/config"
 	"github.com/lucasew/fluxo/internal/session"
+	"github.com/lucasew/fluxo/internal/upnp"
 )
 
 // Server manages the Fluxo server
 type Server struct {
-	config   *config.Config
-	manager  *session.Manager
-	watcher  *session.Watcher
-	listener *HTTPListener
+	config      *config.Config
+	manager     *session.Manager
+	watcher     *session.Watcher
+	listener    *HTTPListener
+	upnpManager *upnp.Manager
 
 	mu      sync.Mutex
 	running bool
@@ -37,11 +39,19 @@ func New(cfg *config.Config) (*Server, error) {
 	// Create HTTP listener
 	listener := NewHTTPListener(cfg, manager)
 
+	// Create UPnP manager
+	upnpManager := upnp.New(manager, upnp.Config{
+		Enabled:     cfg.UPnPEnabled,
+		Description: cfg.UPnPDescription,
+		DHTPort:     cfg.Torrent.DHTPort,
+	})
+
 	return &Server{
-		config:   cfg,
-		manager:  manager,
-		watcher:  watcher,
-		listener: listener,
+		config:      cfg,
+		manager:     manager,
+		watcher:     watcher,
+		listener:    listener,
+		upnpManager: upnpManager,
 	}, nil
 }
 
@@ -58,6 +68,11 @@ func (s *Server) Start(ctx context.Context) error {
 	// Create cancellable context
 	ctx, cancel := context.WithCancel(ctx)
 	s.cancel = cancel
+
+	// Start UPnP manager
+	if err := s.upnpManager.Start(s.config.Torrent.DHTPort); err != nil {
+		return fmt.Errorf("starting UPnP manager: %w", err)
+	}
 
 	// Start watcher in background
 	go s.watcher.Start(ctx)
@@ -93,7 +108,12 @@ func (s *Server) Stop(ctx context.Context) error {
 		s.cancel()
 	}
 
-	// 3. Close session (saves state)
+	// 3. Stop UPnP manager
+	if err := s.upnpManager.Stop(); err != nil {
+		errs = append(errs, fmt.Errorf("stopping UPnP manager: %w", err))
+	}
+
+	// 4. Close session (saves state)
 	if err := s.manager.Close(); err != nil {
 		errs = append(errs, fmt.Errorf("closing session: %w", err))
 	}
