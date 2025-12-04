@@ -8,8 +8,9 @@ import (
 
 // Manager wraps Rain's session and provides event bus
 type Manager struct {
-	session  *torrent.Session
-	eventBus *EventBus
+	session     *torrent.Session
+	eventBus    *EventBus
+	upnpManager *UPNPManager
 }
 
 // New creates a new session manager
@@ -19,9 +20,14 @@ func New(cfg torrent.Config) (*Manager, error) {
 		return nil, fmt.Errorf("creating session: %w", err)
 	}
 
+	eb := NewEventBus()
+	upnp := NewUPNPManager(eb)
+	upnp.Start()
+
 	return &Manager{
-		session:  session,
-		eventBus: NewEventBus(),
+		session:     session,
+		eventBus:    eb,
+		upnpManager: upnp,
 	}, nil
 }
 
@@ -97,6 +103,7 @@ func (m *Manager) GetStats() torrent.SessionStats {
 
 // Close closes the session and event bus
 func (m *Manager) Close() error {
+	m.upnpManager.Stop()
 	m.eventBus.Close()
 	return m.session.Close()
 }
@@ -107,7 +114,14 @@ func (m *Manager) StartTorrent(id string) error {
 	if t == nil {
 		return fmt.Errorf("%w: %s", ErrTorrentNotFound, id)
 	}
-	return t.Start()
+	err := t.Start()
+	if err == nil {
+		m.eventBus.Publish(Event{
+			Type:    EventTorrentStarted,
+			Torrent: t,
+		})
+	}
+	return err
 }
 
 // StopTorrent stops a torrent
@@ -116,7 +130,14 @@ func (m *Manager) StopTorrent(id string) error {
 	if t == nil {
 		return fmt.Errorf("%w: %s", ErrTorrentNotFound, id)
 	}
-	return t.Stop()
+	err := t.Stop()
+	if err == nil {
+		m.eventBus.Publish(Event{
+			Type:    EventTorrentStopped,
+			Torrent: t,
+		})
+	}
+	return err
 }
 
 // VerifyTorrent verifies a torrent's data
@@ -167,13 +188,25 @@ func (m *Manager) GetPeers(id string) ([]torrent.Peer, error) {
 // StartAll starts all torrents
 func (m *Manager) StartAll() {
 	for _, t := range m.session.ListTorrents() {
-		_ = t.Start()
+		err := t.Start()
+		if err == nil {
+			m.eventBus.Publish(Event{
+				Type:    EventTorrentStarted,
+				Torrent: t,
+			})
+		}
 	}
 }
 
 // StopAll stops all torrents
 func (m *Manager) StopAll() {
 	for _, t := range m.session.ListTorrents() {
-		_ = t.Stop()
+		err := t.Stop()
+		if err == nil {
+			m.eventBus.Publish(Event{
+				Type:    EventTorrentStopped,
+				Torrent: t,
+			})
+		}
 	}
 }
