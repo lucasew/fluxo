@@ -10,6 +10,7 @@ import (
 type Manager struct {
 	session  *torrent.Session
 	eventBus *EventBus
+	upnp     *UPnPManager
 }
 
 // New creates a new session manager
@@ -22,6 +23,7 @@ func New(cfg torrent.Config) (*Manager, error) {
 	return &Manager{
 		session:  session,
 		eventBus: NewEventBus(),
+		upnp:     NewUPnPManager(),
 	}, nil
 }
 
@@ -97,6 +99,7 @@ func (m *Manager) GetStats() torrent.SessionStats {
 
 // Close closes the session and event bus
 func (m *Manager) Close() error {
+	m.upnp.Close()
 	m.eventBus.Close()
 	return m.session.Close()
 }
@@ -107,7 +110,11 @@ func (m *Manager) StartTorrent(id string) error {
 	if t == nil {
 		return fmt.Errorf("%w: %s", ErrTorrentNotFound, id)
 	}
-	return t.Start()
+	err := t.Start()
+	if err == nil {
+		go m.upnp.AddMapping(t.Port(), "fluxo torrent")
+	}
+	return err
 }
 
 // StopTorrent stops a torrent
@@ -116,7 +123,11 @@ func (m *Manager) StopTorrent(id string) error {
 	if t == nil {
 		return fmt.Errorf("%w: %s", ErrTorrentNotFound, id)
 	}
-	return t.Stop()
+	err := t.Stop()
+	if err == nil {
+		go m.upnp.DeleteMapping(t.Port())
+	}
+	return err
 }
 
 // VerifyTorrent verifies a torrent's data
@@ -167,13 +178,17 @@ func (m *Manager) GetPeers(id string) ([]torrent.Peer, error) {
 // StartAll starts all torrents
 func (m *Manager) StartAll() {
 	for _, t := range m.session.ListTorrents() {
-		_ = t.Start()
+		if err := t.Start(); err == nil {
+			go m.upnp.AddMapping(t.Port(), "fluxo torrent")
+		}
 	}
 }
 
 // StopAll stops all torrents
 func (m *Manager) StopAll() {
 	for _, t := range m.session.ListTorrents() {
-		_ = t.Stop()
+		if err := t.Stop(); err == nil {
+			go m.upnp.DeleteMapping(t.Port())
+		}
 	}
 }
