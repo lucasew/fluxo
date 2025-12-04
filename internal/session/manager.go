@@ -8,9 +8,9 @@ import (
 
 // Manager wraps Rain's session and provides event bus
 type Manager struct {
-	session  *torrent.Session
-	eventBus *EventBus
-	upnp     *UPnPManager
+	session     *torrent.Session
+	eventBus    *EventBus
+	upnpManager *UPNPManager
 }
 
 // New creates a new session manager
@@ -20,10 +20,14 @@ func New(cfg torrent.Config) (*Manager, error) {
 		return nil, fmt.Errorf("creating session: %w", err)
 	}
 
+	eb := NewEventBus()
+	upnp := NewUPNPManager(eb)
+	upnp.Start()
+
 	return &Manager{
-		session:  session,
-		eventBus: NewEventBus(),
-		upnp:     NewUPnPManager(),
+		session:     session,
+		eventBus:    eb,
+		upnpManager: upnp,
 	}, nil
 }
 
@@ -99,7 +103,7 @@ func (m *Manager) GetStats() torrent.SessionStats {
 
 // Close closes the session and event bus
 func (m *Manager) Close() error {
-	m.upnp.Close()
+	m.upnpManager.Stop()
 	m.eventBus.Close()
 	return m.session.Close()
 }
@@ -112,7 +116,10 @@ func (m *Manager) StartTorrent(id string) error {
 	}
 	err := t.Start()
 	if err == nil {
-		go m.upnp.AddMapping(t.Port(), "fluxo torrent")
+		m.eventBus.Publish(Event{
+			Type:    EventTorrentStarted,
+			Torrent: t,
+		})
 	}
 	return err
 }
@@ -125,7 +132,10 @@ func (m *Manager) StopTorrent(id string) error {
 	}
 	err := t.Stop()
 	if err == nil {
-		go m.upnp.DeleteMapping(t.Port())
+		m.eventBus.Publish(Event{
+			Type:    EventTorrentStopped,
+			Torrent: t,
+		})
 	}
 	return err
 }
@@ -178,8 +188,12 @@ func (m *Manager) GetPeers(id string) ([]torrent.Peer, error) {
 // StartAll starts all torrents
 func (m *Manager) StartAll() {
 	for _, t := range m.session.ListTorrents() {
-		if err := t.Start(); err == nil {
-			go m.upnp.AddMapping(t.Port(), "fluxo torrent")
+		err := t.Start()
+		if err == nil {
+			m.eventBus.Publish(Event{
+				Type:    EventTorrentStarted,
+				Torrent: t,
+			})
 		}
 	}
 }
@@ -187,8 +201,12 @@ func (m *Manager) StartAll() {
 // StopAll stops all torrents
 func (m *Manager) StopAll() {
 	for _, t := range m.session.ListTorrents() {
-		if err := t.Stop(); err == nil {
-			go m.upnp.DeleteMapping(t.Port())
+		err := t.Stop()
+		if err == nil {
+			m.eventBus.Publish(Event{
+				Type:    EventTorrentStopped,
+				Torrent: t,
+			})
 		}
 	}
 }

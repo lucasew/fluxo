@@ -14,6 +14,8 @@ const (
 	EventTorrentAdded   EventType = "torrent_added"
 	EventTorrentRemoved EventType = "torrent_removed"
 	EventTorrentUpdated EventType = "torrent_updated"
+	EventTorrentStarted EventType = "torrent_started"
+	EventTorrentStopped EventType = "torrent_stopped"
 	EventStatsUpdated   EventType = "stats_updated"
 )
 
