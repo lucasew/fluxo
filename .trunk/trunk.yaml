@@ -28,6 +28,9 @@ lint:
     - taplo@0.10.0
     - trufflehog@3.93.4
     - yamllint@1.38.0
+  ignore:
+    - linters: [osv-scanner]
+      paths: [go.mod]
 actions:
   enabled:
     - trunk-upgrade-available

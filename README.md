@@ -122,19 +122,19 @@ database: /var/lib/fluxo/session.db
 
 ### GraphQL Endpoint
 
-```
+```http
 POST http://localhost:8080/graphql
 ```
 
 ### GraphQL Playground
 
-```
+```text
 http://localhost:8080/graphiql
 ```
 
 ### WebSocket (Subscriptions)
 
-```
+```text
 ws://localhost:8080/graphql
 ```
 

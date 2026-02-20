@@ -20,7 +20,11 @@ build = { depends = ["build:web", "build:go"] }
 lint = { run = "trunk check", depends = ["install", "codegen"] }
 fmt = "trunk fmt"
 
-"test:go" = { run = "go test ./...", depends = ["install", "codegen", "build:web"] }
+"test:go" = { run = "go test ./...", depends = [
+  "install",
+  "codegen",
+  "build:web",
+] }
 test = { depends = ["test:*"] }
 
 ci = { depends = ["lint", "test"] }
