@@ -140,7 +140,7 @@ ws://localhost:8080/graphql
 
 ## Project Structure
 
-```
+```text
 fluxo/
 ├── cmd/fluxo/          # Main application entry point
 ├── internal/

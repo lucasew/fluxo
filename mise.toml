@@ -1,6 +1,6 @@
 [tools]
 go = "1.25.4"
-trunk = "1.3.4"
+trunk = "latest"
 bun = "1.2.4"
 node = "22.14.0"
 
