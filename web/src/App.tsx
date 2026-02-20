@@ -1,13 +1,13 @@
-import { Suspense } from 'react'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import Layout from './Layout'
-import Home from './pages/Home'
-import TorrentDetail from './pages/TorrentDetail'
-import AddTorrent from './pages/AddTorrent'
+import { Suspense } from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Layout from "./Layout";
+import Home from "./pages/Home";
+import TorrentDetail from "./pages/TorrentDetail";
+import AddTorrent from "./pages/AddTorrent";
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <Layout />,
     children: [
       {
@@ -15,19 +15,19 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: 'torrent/:id',
+        path: "torrent/:id",
         element: <TorrentDetail />,
       },
       {
-        path: 'add',
+        path: "add",
         element: <AddTorrent />,
       },
     ],
   },
-])
+]);
 
 function App() {
-  return <RouterProvider router={router} />
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;

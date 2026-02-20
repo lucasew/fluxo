@@ -153,10 +153,10 @@ func MapWebseeds(webseeds []torrent.Webseed) []*Webseed {
 		}
 
 		result[i] = &Webseed{
-			URL:              ws.URL,
-			DownloadSpeed:    ws.DownloadSpeed,
-			BytesDownloaded:  "0", // Not available in current API
-			Error:            errStr,
+			URL:             ws.URL,
+			DownloadSpeed:   ws.DownloadSpeed,
+			BytesDownloaded: "0", // Not available in current API
+			Error:           errStr,
 		}
 	}
 	return result

@@ -13,12 +13,14 @@ Modern BitTorrent client with a GraphQL API and React web interface.
 ## Architecture
 
 ### Backend (Go)
+
 - **Rain**: BitTorrent protocol implementation
 - **Cobra + Viper**: CLI and configuration management
 - **gqlgen**: GraphQL server with subscription support
 - **Event Bus**: Internal event system for real-time updates
 
 ### Frontend (TypeScript/React)
+
 - **React 18**: Modern React with hooks
 - **Relay**: GraphQL client with normalized cache
 - **DaisyUI 5**: Component library built on Tailwind 4
@@ -27,56 +29,68 @@ Modern BitTorrent client with a GraphQL API and React web interface.
 ## Building
 
 ### Prerequisites
-- Go 1.24+
-- Node.js 18+
 
-### Build Backend
+- Go 1.25+
+- Bun 1.2+
+- Mise (recommended)
+
+### Using Mise (Recommended)
+
 ```bash
-go build -o fluxo ./cmd/fluxo
+mise run install
+mise run build
 ```
 
-### Build Frontend
+### Manual Build
+
+#### Build Frontend
+
 ```bash
 cd web
-npm install
-npm run build
+bun install
+bun run build
 cd ..
 ```
 
-### Build All
-The backend embeds the frontend, so build in order:
+#### Build Backend
+
 ```bash
-cd web && npm install && npm run build && cd ..
-go build -o fluxo ./cmd/fluxo
+go build -o dist/fluxo ./cmd/fluxo
 ```
 
 ## Running
 
 ### Production Mode
+
 ```bash
-./fluxo
+./dist/fluxo
 ```
 
 ### Development Mode
+
 Terminal 1 (Backend with dev proxy):
+
 ```bash
 go run ./cmd/fluxo --dev-mode
 ```
 
 Terminal 2 (Frontend dev server):
+
 ```bash
 cd web
-npm run dev
+bun run dev
 ```
 
 ## Configuration
 
 ### CLI Flags
+
 ```bash
 ./fluxo --help
 ```
 
 Key flags:
+
 - `--api-port`: API server port (default: 8080)
 - `--api-host`: API server host (default: 127.0.0.1)
 - `--data-dir`: Downloads directory (default: ~/.fluxo/downloads)
@@ -84,7 +98,9 @@ Key flags:
 - `--debug`: Enable debug logging
 
 ### Environment Variables
+
 All flags can be set via environment variables with `FLUXO_` prefix:
+
 ```bash
 export FLUXO_API_PORT=9090
 export FLUXO_DATA_DIR=/mnt/torrents
@@ -92,7 +108,9 @@ export FLUXO_DATA_DIR=/mnt/torrents
 ```
 
 ### Config File
+
 Create `fluxo.yaml` in current directory, `~/.fluxo/`, or `/etc/fluxo/`:
+
 ```yaml
 api-port: 8080
 api-host: 127.0.0.1
@@ -103,16 +121,19 @@ database: /var/lib/fluxo/session.db
 ## API
 
 ### GraphQL Endpoint
+
 ```
 POST http://localhost:8080/graphql
 ```
 
 ### GraphQL Playground
+
 ```
 http://localhost:8080/graphiql
 ```
 
 ### WebSocket (Subscriptions)
+
 ```
 ws://localhost:8080/graphql
 ```

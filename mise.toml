@@ -1,2 +1,26 @@
 [tools]
 go = "1.25.4"
+trunk = "1.3.4"
+bun = "1.2.4"
+node = "22.14.0"
+
+[tasks]
+"install:go" = "go mod download"
+"install:bun" = "cd web && bun install"
+install = { depends = ["install:*"] }
+
+"codegen:gql" = "go run github.com/99designs/gqlgen && trunk fmt internal/graphql"
+"codegen:relay" = "cd web && bun run relay && cd .. && trunk fmt web/src/__generated__"
+codegen = { depends = ["codegen:gql", "codegen:relay"] }
+
+"build:web" = "cd web && bun run build"
+"build:go" = "go build -o dist/fluxo ./cmd/fluxo"
+build = { depends = ["build:web", "build:go"] }
+
+lint = { run = "trunk check", depends = ["install", "codegen"] }
+fmt = "trunk fmt"
+
+"test:go" = { run = "go test ./...", depends = ["install", "codegen", "build:web"] }
+test = { depends = ["test:*"] }
+
+ci = { depends = ["lint", "test"] }

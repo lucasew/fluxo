@@ -205,7 +205,7 @@ func (m *UPNPManager) getLocalIP() (string, error) {
 }
 
 func getLocalIPForClient(client *internetgateway2.WANIPConnection1) (string, error) {
-	host := client.ServiceClient.Location.Host
+	host := client.Location.Host
 	if strings.Contains(host, ":") {
 		h, _, err := net.SplitHostPort(host)
 		if err == nil {
@@ -217,12 +217,13 @@ func getLocalIPForClient(client *internetgateway2.WANIPConnection1) (string, err
 	if err != nil {
 		return "", err
 	}
-	defer conn.Close()
+	defer func() {
+		_ = conn.Close()
+	}()
 
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 	return localAddr.IP.String(), nil
 }
-
 
 // addMapping attempts to add a port mapping using UPnP
 func (m *UPNPManager) addMapping(port int) error {

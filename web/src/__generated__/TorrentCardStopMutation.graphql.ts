@@ -8,7 +8,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from 'relay-runtime';
+import { ConcreteRequest } from "relay-runtime";
 export type TorrentCardStopMutation$variables = {
   id: string;
 };
@@ -20,55 +20,55 @@ export type TorrentCardStopMutation = {
   variables: TorrentCardStopMutation$variables;
 };
 
-const node: ConcreteRequest = (function(){
-var v0 = [
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "id"
-  }
-],
-v1 = [
-  {
-    "alias": null,
-    "args": [
+const node: ConcreteRequest = (function () {
+  var v0 = [
       {
-        "kind": "Variable",
-        "name": "id",
-        "variableName": "id"
-      }
+        defaultValue: null,
+        kind: "LocalArgument",
+        name: "id",
+      },
     ],
-    "kind": "ScalarField",
-    "name": "stopTorrent",
-    "storageKey": null
-  }
-];
-return {
-  "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Fragment",
-    "metadata": null,
-    "name": "TorrentCardStopMutation",
-    "selections": (v1/*: any*/),
-    "type": "Mutation",
-    "abstractKey": null
-  },
-  "kind": "Request",
-  "operation": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Operation",
-    "name": "TorrentCardStopMutation",
-    "selections": (v1/*: any*/)
-  },
-  "params": {
-    "cacheID": "715e63b93458cd26f5508603eae28c71",
-    "id": null,
-    "metadata": {},
-    "name": "TorrentCardStopMutation",
-    "operationKind": "mutation",
-    "text": "mutation TorrentCardStopMutation(\n  $id: ID!\n) {\n  stopTorrent(id: $id)\n}\n"
-  }
-};
+    v1 = [
+      {
+        alias: null,
+        args: [
+          {
+            kind: "Variable",
+            name: "id",
+            variableName: "id",
+          },
+        ],
+        kind: "ScalarField",
+        name: "stopTorrent",
+        storageKey: null,
+      },
+    ];
+  return {
+    fragment: {
+      argumentDefinitions: v0 /*: any*/,
+      kind: "Fragment",
+      metadata: null,
+      name: "TorrentCardStopMutation",
+      selections: v1 /*: any*/,
+      type: "Mutation",
+      abstractKey: null,
+    },
+    kind: "Request",
+    operation: {
+      argumentDefinitions: v0 /*: any*/,
+      kind: "Operation",
+      name: "TorrentCardStopMutation",
+      selections: v1 /*: any*/,
+    },
+    params: {
+      cacheID: "715e63b93458cd26f5508603eae28c71",
+      id: null,
+      metadata: {},
+      name: "TorrentCardStopMutation",
+      operationKind: "mutation",
+      text: "mutation TorrentCardStopMutation(\n  $id: ID!\n) {\n  stopTorrent(id: $id)\n}\n",
+    },
+  };
 })();
 
 (node as any).hash = "ff9539307ce18417d6703b0c6988e5f8";

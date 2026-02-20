@@ -7,13 +7,13 @@ export default defineConfig({
   plugins: [tailwind(), react(), relay],
   define: {
     // Polyfill for parse-torrent/bencode
-    'global': {},
+    global: {},
   },
   resolve: {
     alias: {
-      buffer: 'buffer',
-      path: 'path-browserify',
-    }
+      buffer: "buffer",
+      path: "path-browserify",
+    },
   },
   server: {
     port: 5173,
@@ -32,8 +32,8 @@ export default defineConfig({
   optimizeDeps: {
     esbuildOptions: {
       define: {
-        global: 'globalThis'
-      }
-    }
-  }
+        global: "globalThis",
+      },
+    },
+  },
 });

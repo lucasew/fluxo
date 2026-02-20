@@ -1,0 +1,79 @@
+name: Autorelease
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build-test-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Mise
+        uses: jdx/mise-action@v2
+
+      - name: Install Dependencies
+        run: mise run install
+
+      - name: Codegen
+        run: mise run codegen
+
+      - name: Check for changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Codegen resulted in changes."
+            git status
+            git diff
+            exit 1
+          fi
+
+      - name: Create PR if Codegen Changed Files
+        if: failure() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: chore(codegen) update generated code
+          title: chore(codegen) update generated code
+          body: Codegen updated files. Please merge this PR.
+          branch: chore/codegen-update
+          base: "${{ github.ref_name }}"
+          delete-branch: true
+
+      - name: CI
+        run: mise run ci
+
+      - name: Build
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        run: mise run build
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TAG="v$(date +'%Y%m%d%H%M%S')"
+            echo "Creating release $TAG"
+            gh release create "$TAG" dist/fluxo --generate-notes
+          else
+             gh release create "${{ github.ref_name }}" dist/fluxo --generate-notes
+          fi
+
+      - name: Upload Artifacts
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            dist/fluxo
+            web/dist

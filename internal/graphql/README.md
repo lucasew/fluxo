@@ -26,6 +26,7 @@ go run github.com/99designs/gqlgen@latest generate
 ```
 
 Isso irá:
+
 1. Gerar os tipos em `models_gen.go`
 2. Atualizar `generated.go` com executores
 3. Completar a implementação do GraphQL server
@@ -33,6 +34,7 @@ Isso irá:
 ## Erros Nomeados
 
 O package usa erros nomeados no `internal/session/errors.go`:
+
 - `ErrTorrentNotFound`
 - `ErrInvalidURI`
 - `ErrAlreadyExists`
@@ -44,6 +46,7 @@ Todos os erros usam `%w` para permitir `errors.Is()` e `errors.As()`.
 ## API Rain 1.13.0
 
 Os mappers foram atualizados para a API do Rain 1.13.0:
+
 - `Stats.Bytes.Completed` ao invés de `BytesCompleted`
 - `Stats.Speed.Download/Upload`
 - `t.AddedAt()` método ao invés de campo

@@ -8,7 +8,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from 'relay-runtime';
+import { ConcreteRequest } from "relay-runtime";
 export type AddTorrentInput = {
   stopAfterDownload?: boolean | null | undefined;
   stopAfterMetadata?: boolean | null | undefined;
@@ -29,73 +29,73 @@ export type AddTorrentMutation = {
   variables: AddTorrentMutation$variables;
 };
 
-const node: ConcreteRequest = (function(){
-var v0 = [
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "input"
-  }
-],
-v1 = [
-  {
-    "alias": null,
-    "args": [
+const node: ConcreteRequest = (function () {
+  var v0 = [
       {
-        "kind": "Variable",
-        "name": "input",
-        "variableName": "input"
-      }
-    ],
-    "concreteType": "Torrent",
-    "kind": "LinkedField",
-    "name": "addTorrent",
-    "plural": false,
-    "selections": [
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "id",
-        "storageKey": null
+        defaultValue: null,
+        kind: "LocalArgument",
+        name: "input",
       },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "name",
-        "storageKey": null
-      }
     ],
-    "storageKey": null
-  }
-];
-return {
-  "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Fragment",
-    "metadata": null,
-    "name": "AddTorrentMutation",
-    "selections": (v1/*: any*/),
-    "type": "Mutation",
-    "abstractKey": null
-  },
-  "kind": "Request",
-  "operation": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Operation",
-    "name": "AddTorrentMutation",
-    "selections": (v1/*: any*/)
-  },
-  "params": {
-    "cacheID": "457d0182956587ad9b0435d1f407f69b",
-    "id": null,
-    "metadata": {},
-    "name": "AddTorrentMutation",
-    "operationKind": "mutation",
-    "text": "mutation AddTorrentMutation(\n  $input: AddTorrentInput!\n) {\n  addTorrent(input: $input) {\n    id\n    name\n  }\n}\n"
-  }
-};
+    v1 = [
+      {
+        alias: null,
+        args: [
+          {
+            kind: "Variable",
+            name: "input",
+            variableName: "input",
+          },
+        ],
+        concreteType: "Torrent",
+        kind: "LinkedField",
+        name: "addTorrent",
+        plural: false,
+        selections: [
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "id",
+            storageKey: null,
+          },
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "name",
+            storageKey: null,
+          },
+        ],
+        storageKey: null,
+      },
+    ];
+  return {
+    fragment: {
+      argumentDefinitions: v0 /*: any*/,
+      kind: "Fragment",
+      metadata: null,
+      name: "AddTorrentMutation",
+      selections: v1 /*: any*/,
+      type: "Mutation",
+      abstractKey: null,
+    },
+    kind: "Request",
+    operation: {
+      argumentDefinitions: v0 /*: any*/,
+      kind: "Operation",
+      name: "AddTorrentMutation",
+      selections: v1 /*: any*/,
+    },
+    params: {
+      cacheID: "457d0182956587ad9b0435d1f407f69b",
+      id: null,
+      metadata: {},
+      name: "AddTorrentMutation",
+      operationKind: "mutation",
+      text: "mutation AddTorrentMutation(\n  $input: AddTorrentInput!\n) {\n  addTorrent(input: $input) {\n    id\n    name\n  }\n}\n",
+    },
+  };
 })();
 
 (node as any).hash = "078df9fc4c9d7b2333960f60392c124f";
