@@ -13,8 +13,10 @@ install = { depends = ["install:*"] }
 "codegen:relay" = "cd web && bun run relay && cd .. && trunk fmt web/src/__generated__"
 codegen = { depends = ["codegen:gql", "codegen:relay"] }
 
-"build:web" = "cd web && bun run build"
-"build:go" = "go build -o dist/fluxo ./cmd/fluxo"
+"build:web" = { run = "cd web && bun run build", depends = ["codegen"] }
+"build:go" = { run = "go build -o dist/fluxo ./cmd/fluxo", depends = [
+  "codegen",
+] }
 build = { depends = ["build:web", "build:go"] }
 
 lint = { run = "trunk check", depends = ["install", "codegen"] }
