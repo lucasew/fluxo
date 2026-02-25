@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cenkalti/rain/torrent"
+	"github.com/lucasew/fluxo/internal/upnp"
 )
 
 // Manager wraps Rain's session and provides event bus
@@ -11,6 +12,7 @@ type Manager struct {
 	session     *torrent.Session
 	eventBus    *EventBus
 	upnpManager *UPNPManager
+	upnpService *upnp.Service
 }
 
 // New creates a new session manager
@@ -21,13 +23,17 @@ func New(cfg torrent.Config) (*Manager, error) {
 	}
 
 	eb := NewEventBus()
-	upnp := NewUPNPManager(eb)
-	upnp.Start()
+	upnpService := upnp.NewService()
+	upnpManager := NewUPNPManager(eb, upnpService)
+
+	upnpService.Start()
+	upnpManager.Start()
 
 	return &Manager{
 		session:     session,
 		eventBus:    eb,
-		upnpManager: upnp,
+		upnpManager: upnpManager,
+		upnpService: upnpService,
 	}, nil
 }
 
@@ -104,6 +110,7 @@ func (m *Manager) GetStats() torrent.SessionStats {
 // Close closes the session and event bus
 func (m *Manager) Close() error {
 	m.upnpManager.Stop()
+	m.upnpService.Stop()
 	m.eventBus.Close()
 	return m.session.Close()
 }
