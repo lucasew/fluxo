@@ -149,7 +149,18 @@ func (l *HTTPListener) createSchema(resolver *graphql.Resolver) *handler.Server 
 		KeepAlivePingInterval: 30 * time.Second,
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
-				return true // Allow all origins in dev mode
+				if l.config.DevMode {
+					return true // Allow all origins in dev mode
+				}
+				origin := r.Header.Get("Origin")
+				if origin == "" {
+					return true // Allow requests without an origin (e.g., non-browser clients)
+				}
+				u, err := url.Parse(origin)
+				if err != nil {
+					return false
+				}
+				return u.Host == r.Host
 			},
 		},
 	})
@@ -168,13 +179,18 @@ func (l *HTTPListener) withMiddleware(handler http.Handler) http.Handler {
 	// CORS middleware
 	cors := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			if l.config.DevMode {
+				w.Header().Set("Access-Control-Allow-Origin", "*")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-			if r.Method == "OPTIONS" {
-				w.WriteHeader(http.StatusOK)
-				return
+				if r.Method == "OPTIONS" {
+					w.WriteHeader(http.StatusOK)
+					return
+				}
+			} else {
+				// Only set CORS headers in production if a specific configuration allows it.
+				// For now, no CORS allowed in production to prevent CSRF.
 			}
 
 			next.ServeHTTP(w, r)

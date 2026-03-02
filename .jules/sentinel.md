@@ -1,0 +1,1 @@
+- 2026-03-02: [HIGH] Wildcard CORS policy (`Access-Control-Allow-Origin: *`) and overly permissive WebSocket CheckOrigin bypassing Same-Origin Policy in production servers.
