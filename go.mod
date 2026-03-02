@@ -6,7 +6,6 @@ require (
 	github.com/99designs/gqlgen v0.17.84
 	github.com/cenkalti/rain v1.13.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/huin/goupnp v1.3.0
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
 	github.com/vektah/gqlparser/v2 v2.5.31
@@ -26,6 +25,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
+	github.com/huin/goupnp v1.3.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackpal/bencode-go v1.0.0 // indirect
 	github.com/juju/ratelimit v1.0.2 // indirect
