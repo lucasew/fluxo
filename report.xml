@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+	<testsuite name="github.com/lucasew/fluxo/cmd/fluxo" tests="0" failures="0" errors="0" id="0" hostname="devbox" time="0.000" timestamp="2026-03-04T07:53:20Z"></testsuite>
+	<testsuite name="github.com/lucasew/fluxo/internal/config" tests="0" failures="0" errors="0" id="1" hostname="devbox" time="0.000" timestamp="2026-03-04T07:53:20Z"></testsuite>
+	<testsuite name="github.com/lucasew/fluxo/internal/graphql" tests="0" failures="0" errors="0" id="2" hostname="devbox" time="0.000" timestamp="2026-03-04T07:53:20Z"></testsuite>
+	<testsuite name="github.com/lucasew/fluxo/internal/server" tests="0" failures="0" errors="0" id="3" hostname="devbox" time="0.000" timestamp="2026-03-04T07:53:20Z"></testsuite>
+	<testsuite name="github.com/lucasew/fluxo/internal/session" tests="0" failures="0" errors="0" id="4" hostname="devbox" time="0.000" timestamp="2026-03-04T07:53:20Z"></testsuite>
+	<testsuite name="github.com/lucasew/fluxo/web" tests="0" failures="0" errors="0" id="5" hostname="devbox" time="0.000" timestamp="2026-03-04T07:53:20Z"></testsuite>
+</testsuites>
