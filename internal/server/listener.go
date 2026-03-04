@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -84,22 +83,12 @@ func (l *HTTPListener) Start(ctx context.Context) error {
 				// (Though checking prefix here is a safeguard, the mux router prioritizes exact/prefix matches if registered.
 				// But since we use mux.HandleFunc("/", ...), it matches everything not matched by others.)
 
-				// Serve index.html
-				index, err := webFS.Open("index.html")
-				if err != nil {
-					http.Error(w, "index.html not found", http.StatusInternalServerError)
-					return
-				}
-				defer index.Close()
-
-				// Get stat for ModTime
-				stat, err := index.Stat()
-				if err != nil {
-					http.Error(w, "index.html stat failed", http.StatusInternalServerError)
-					return
-				}
-
-				http.ServeContent(w, r, "index.html", stat.ModTime(), index.(io.ReadSeeker))
+				// Serve index.html using the file server directly.
+				// Since we know we want index.html, we create a new request with the updated path
+				// to avoid mutating the original request, which might be used by other middleware.
+				r2 := r.Clone(r.Context())
+				r2.URL.Path = "/index.html"
+				fileServer.ServeHTTP(w, r2)
 				return
 			}
 

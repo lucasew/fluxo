@@ -1,0 +1,1 @@
+- 2026-03-04: Avoid unsafe type assertions on fs.File (e.g. `index.(io.ReadSeeker)`); prefer using standard library handlers like `http.FileServer` with cloned requests to serve embedded files safely.
