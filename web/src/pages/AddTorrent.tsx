@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useMutation } from 'react-relay';
 import { graphql } from 'relay-runtime';
 import { useNavigate } from 'react-router-dom';
@@ -68,7 +68,7 @@ export default function AddTorrent() {
                     uri: uriToAdd,
                 }
             },
-            onCompleted: (response, errors) => {
+            onCompleted: (_response, errors) => {
                 setIsProcessing(false);
                 if (errors) {
                     setError(errors[0].message);
