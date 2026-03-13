@@ -3,6 +3,7 @@ import { useMutation } from 'react-relay';
 import { graphql } from 'relay-runtime';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, Link as LinkIcon, FileText } from 'lucide-react';
+import { reportError } from '../utils/error';
 // @ts-ignore
 import parseTorrent, { toMagnetURI } from 'parse-torrent';
 import { Buffer } from 'buffer';
@@ -56,7 +57,7 @@ export default function AddTorrent() {
                 const parsed = await parseTorrent(buffer);
                 uriToAdd = toMagnetURI(parsed);
             } catch (err) {
-                console.error(err);
+                reportError(err);
                 throw new Error('Invalid .torrent file: ' + (err instanceof Error ? err.message : String(err)));
             }
         }
@@ -76,12 +77,14 @@ export default function AddTorrent() {
                 }
             },
             onError: (err) => {
+                reportError(err);
                 setIsProcessing(false);
                 setError(err.message);
             }
         });
 
     } catch (err: any) {
+        reportError(err);
         setIsProcessing(false);
         setError(err.message);
     }

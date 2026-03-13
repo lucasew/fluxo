@@ -1,0 +1,1 @@
+- 2024-03-13: Unhandled errors or direct console.error calls should be routed through a centralized error-reporting function
