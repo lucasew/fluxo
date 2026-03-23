@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, Link as LinkIcon, FileText } from 'lucide-react';
 // @ts-ignore
 import parseTorrent, { toMagnetURI } from 'parse-torrent';
+import { reportError } from '../utils/error';
 import { Buffer } from 'buffer';
 
 // Ensure Buffer is available globally for parse-torrent if needed
@@ -56,7 +57,7 @@ export default function AddTorrent() {
                 const parsed = await parseTorrent(buffer);
                 uriToAdd = toMagnetURI(parsed);
             } catch (err) {
-                console.error(err);
+                reportError(err, { source: 'AddTorrent.tsx', context: 'parseTorrent' });
                 throw new Error('Invalid .torrent file: ' + (err instanceof Error ? err.message : String(err)));
             }
         }
@@ -77,12 +78,14 @@ export default function AddTorrent() {
             },
             onError: (err) => {
                 setIsProcessing(false);
+                reportError(err, { source: 'AddTorrent.tsx', context: 'commit.onError' });
                 setError(err.message);
             }
         });
 
     } catch (err: any) {
         setIsProcessing(false);
+        reportError(err, { source: 'AddTorrent.tsx', context: 'handleSubmit.catch' });
         setError(err.message);
     }
   };
