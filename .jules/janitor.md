@@ -1,0 +1,1 @@
+- 2025-03-25: Always explicitly handle or assign unhandled return values from Close methods (e.g., `_ = f.Close()`) to prevent resource leak lint warnings and silent failures, preferring safe type assertions over unsafe casting for interfaces like `io.ReadSeeker`.
