@@ -7,7 +7,13 @@ import { ArrowLeft, Upload, Link as LinkIcon, FileText } from 'lucide-react';
 import parseTorrent, { toMagnetURI } from 'parse-torrent';
 import { Buffer } from 'buffer';
 
-// Ensure Buffer is available globally for parse-torrent if needed
+/**
+ * The `parse-torrent` library was originally designed for Node.js and heavily relies
+ * on the `Buffer` object for binary manipulation (especially for parsing `.torrent`
+ * bencoded files). Since Vite and modern browsers don't provide this polyfill
+ * automatically, we must inject it into the global `window` object here before
+ * any parsing occurs.
+ */
 if (typeof window !== 'undefined') {
     (window as any).Buffer = Buffer;
 }
@@ -21,6 +27,14 @@ const AddTorrentMutation = graphql`
   }
 `;
 
+/**
+ * Component for adding a new torrent via either a Magnet URI or a `.torrent` file.
+ *
+ * Instead of relying on the backend to parse uploaded `.torrent` files, this component
+ * parses `.torrent` files locally in the browser using the `parse-torrent` library.
+ * The parsed file is then converted to a Magnet URI, ensuring the backend GraphQL
+ * API only needs to support a single `addTorrent` interface (which accepts URIs).
+ */
 export default function AddTorrent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'magnet' | 'file'>('magnet');
@@ -31,6 +45,16 @@ export default function AddTorrent() {
 
   const [commit, isInFlight] = useMutation(AddTorrentMutation);
 
+  /**
+   * Processes the form submission based on the active tab (Magnet vs File).
+   *
+   * If a `.torrent` file is provided, it reads the file into an ArrayBuffer,
+   * converts it to a Buffer for `parse-torrent`, and extracts the equivalent
+   * Magnet URI. It then sends this URI to the backend via the `AddTorrentMutation`.
+   *
+   * Note that `parseTorrent` throws exceptions on invalid binary data, so the parsing
+   * is wrapped in a try/catch block to present user-friendly error states.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
