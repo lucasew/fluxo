@@ -7,14 +7,15 @@ import (
 	"github.com/cenkalti/rain/torrent"
 )
 
-// Watcher watches for torrent changes and publishes events
+// Watcher periodically polls the session state and diffs it against an in-memory cache.
+// It exists because the underlying library does not natively stream granular stat changes.
 type Watcher struct {
 	manager  *Manager
 	interval time.Duration
 	cache    map[string]*torrent.Stats
 }
 
-// NewWatcher creates a new watcher
+// NewWatcher initializes a stat watcher targeting the specified polling interval.
 func NewWatcher(manager *Manager, interval time.Duration) *Watcher {
 	return &Watcher{
 		manager:  manager,
@@ -23,7 +24,8 @@ func NewWatcher(manager *Manager, interval time.Duration) *Watcher {
 	}
 }
 
-// Start starts the watcher loop
+// Start blocks and runs the ticker loop, dispatching EventTorrentUpdated or
+// EventStatsUpdated whenever a cached diff detects a change.
 func (w *Watcher) Start(ctx context.Context) {
 	ticker := time.NewTicker(w.interval)
 	defer ticker.Stop()
@@ -83,7 +85,7 @@ func (w *Watcher) check() {
 	})
 }
 
-// statsChanged compares two torrent stats for changes
+// statsChanged evaluates a subset of high-frequency fields to determine if a broadcast is necessary.
 func statsChanged(old, new *torrent.Stats) bool {
 	// Compare key fields that change frequently
 	return old.Status != new.Status ||

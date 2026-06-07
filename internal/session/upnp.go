@@ -13,6 +13,8 @@ import (
 	"github.com/huin/goupnp/dcps/internetgateway2"
 )
 
+// UPNPManager tracks active torrent ports and manages their lifecycle against local
+// UPnP Internet Gateway Devices (IGD) to ensure inbound connectivity.
 type UPNPManager struct {
 	eventBus *EventBus
 	subID    string
@@ -28,6 +30,7 @@ type UPNPManager struct {
 	discoveryDone chan struct{}
 }
 
+// NewUPNPManager initializes a UPnP manager hooked to the given EventBus.
 func NewUPNPManager(eb *EventBus) *UPNPManager {
 	return &UPNPManager{
 		eventBus:      eb,
@@ -37,6 +40,8 @@ func NewUPNPManager(eb *EventBus) *UPNPManager {
 	}
 }
 
+// Start subscribes to torrent lifecycle events and asynchronously initiates UPnP
+// device discovery to avoid blocking the main startup thread.
 func (m *UPNPManager) Start() {
 	id, ch := m.eventBus.Subscribe()
 	m.subID = id
@@ -100,6 +105,8 @@ func (m *UPNPManager) discover() {
 	}
 }
 
+// Stop unsubscribes from events and attempts to unmap all active port mappings.
+// This executes concurrently with a 5-second timeout to prevent shutdown hangs.
 func (m *UPNPManager) Stop() {
 	close(m.stopCh)
 	if m.subID != "" {
@@ -224,7 +231,8 @@ func getLocalIPForClient(client *internetgateway2.WANIPConnection1) (string, err
 }
 
 
-// addMapping attempts to add a port mapping using UPnP
+// addMapping waits for discovery completion and attempts to forward the port
+// via UDP on any available local UPnP device.
 func (m *UPNPManager) addMapping(port int) error {
 	// Wait for initial discovery to complete
 	select {
@@ -264,7 +272,7 @@ func (m *UPNPManager) addMapping(port int) error {
 	return nil
 }
 
-// removeMapping attempts to remove a port mapping using UPnP
+// removeMapping deletes the specified UDP port mapping from all known UPnP clients.
 func (m *UPNPManager) removeMapping(port int) error {
 	m.clientsMu.RLock()
 	clients := m.clients

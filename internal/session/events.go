@@ -7,7 +7,7 @@ import (
 	"github.com/cenkalti/rain/torrent"
 )
 
-// EventType represents the type of event
+// EventType defines constants for specific domain events occurring within the session.
 type EventType string
 
 const (
@@ -19,7 +19,8 @@ const (
 	EventStatsUpdated   EventType = "stats_updated"
 )
 
-// Event represents an event in the system
+// Event represents a single state change or data snapshot in the system.
+// Depending on EventType, either Torrent, Stats, or ID will be populated.
 type Event struct {
 	Type    EventType
 	Torrent *torrent.Torrent // nil for stats events
@@ -27,14 +28,14 @@ type Event struct {
 	ID      string // torrent ID for removed events
 }
 
-// EventBus manages event subscriptions
+// EventBus manages thread-safe broadcast pub/sub routing for application events.
 type EventBus struct {
 	mu          sync.RWMutex
 	subscribers map[string]chan Event
 	nextID      int
 }
 
-// NewEventBus creates a new event bus
+// NewEventBus initializes an empty broadcast hub for event distribution.
 func NewEventBus() *EventBus {
 	return &EventBus{
 		subscribers: make(map[string]chan Event),
@@ -42,7 +43,8 @@ func NewEventBus() *EventBus {
 	}
 }
 
-// Subscribe creates a new subscription and returns the channel and subscription ID
+// Subscribe allocates a new buffered channel (capacity 100) and returns its ID.
+// Callers *must* invoke Unsubscribe when finished to prevent memory/goroutine leaks.
 func (eb *EventBus) Subscribe() (string, <-chan Event) {
 	eb.mu.Lock()
 	defer eb.mu.Unlock()
@@ -56,7 +58,7 @@ func (eb *EventBus) Subscribe() (string, <-chan Event) {
 	return id, ch
 }
 
-// Unsubscribe removes a subscription
+// Unsubscribe safely removes a subscriber and closes its channel, freeing resources.
 func (eb *EventBus) Unsubscribe(id string) {
 	eb.mu.Lock()
 	defer eb.mu.Unlock()
@@ -67,7 +69,8 @@ func (eb *EventBus) Unsubscribe(id string) {
 	}
 }
 
-// Publish sends an event to all subscribers (non-blocking)
+// Publish broadcasts an event to all active subscribers.
+// Uses a non-blocking select; if a subscriber's buffer is full, the event is dropped for them.
 func (eb *EventBus) Publish(event Event) {
 	eb.mu.RLock()
 	defer eb.mu.RUnlock()
@@ -81,7 +84,7 @@ func (eb *EventBus) Publish(event Event) {
 	}
 }
 
-// Close closes all subscriptions
+// Close forcefully drains and shuts down all active subscriptions.
 func (eb *EventBus) Close() {
 	eb.mu.Lock()
 	defer eb.mu.Unlock()

@@ -6,14 +6,15 @@ import (
 	"github.com/cenkalti/rain/torrent"
 )
 
-// Manager wraps Rain's session and provides event bus
+// Manager orchestrates the underlying Rain torrent session alongside a local event bus
+// and UPnP lifecycle. It acts as the central coordinator for torrent operations.
 type Manager struct {
 	session     *torrent.Session
 	eventBus    *EventBus
 	upnpManager *UPNPManager
 }
 
-// New creates a new session manager
+// New initializes a Rain torrent session, event bus, and starts UPnP port mapping discovery.
 func New(cfg torrent.Config) (*Manager, error) {
 	session, err := torrent.NewSession(cfg)
 	if err != nil {
@@ -31,17 +32,17 @@ func New(cfg torrent.Config) (*Manager, error) {
 	}, nil
 }
 
-// Session returns the underlying Rain session
+// Session provides direct access to the underlying Rain session.
 func (m *Manager) Session() *torrent.Session {
 	return m.session
 }
 
-// EventBus returns the event bus
+// EventBus exposes the centralized bus for torrent and stats lifecycle events.
 func (m *Manager) EventBus() *EventBus {
 	return m.eventBus
 }
 
-// AddTorrent adds a new torrent
+// AddTorrent adds a torrent via magnet link or remote URI and publishes an EventTorrentAdded.
 func (m *Manager) AddTorrent(uri string, opts *torrent.AddTorrentOptions) (*torrent.Torrent, error) {
 	if uri == "" {
 		return nil, fmt.Errorf("%w: empty URI", ErrInvalidURI)
@@ -62,7 +63,8 @@ func (m *Manager) AddTorrent(uri string, opts *torrent.AddTorrentOptions) (*torr
 	return t, nil
 }
 
-// RemoveTorrent removes a torrent
+// RemoveTorrent drops a torrent from the active session and deletes its state from the database.
+// Note: This does not delete actual downloaded file data from disk.
 func (m *Manager) RemoveTorrent(id string) error {
 	t := m.session.GetTorrent(id)
 	if t == nil {
@@ -82,7 +84,7 @@ func (m *Manager) RemoveTorrent(id string) error {
 	return nil
 }
 
-// GetTorrent returns a torrent by ID
+// GetTorrent retrieves an active torrent, returning an error if it does not exist.
 func (m *Manager) GetTorrent(id string) (*torrent.Torrent, error) {
 	t := m.session.GetTorrent(id)
 	if t == nil {
@@ -91,24 +93,24 @@ func (m *Manager) GetTorrent(id string) (*torrent.Torrent, error) {
 	return t, nil
 }
 
-// GetTorrents returns all torrents
+// GetTorrents retrieves all currently tracked torrents in the session.
 func (m *Manager) GetTorrents() []*torrent.Torrent {
 	return m.session.ListTorrents()
 }
 
-// GetStats returns session statistics
+// GetStats retrieves global aggregated statistics for the entire session.
 func (m *Manager) GetStats() torrent.SessionStats {
 	return m.session.Stats()
 }
 
-// Close closes the session and event bus
+// Close halts UPnP, cleans up the event bus, and gracefully shuts down the Rain session.
 func (m *Manager) Close() error {
 	m.upnpManager.Stop()
 	m.eventBus.Close()
 	return m.session.Close()
 }
 
-// StartTorrent starts a torrent
+// StartTorrent resumes downloading/seeding for a stopped torrent and emits EventTorrentStarted.
 func (m *Manager) StartTorrent(id string) error {
 	t := m.session.GetTorrent(id)
 	if t == nil {
@@ -124,7 +126,7 @@ func (m *Manager) StartTorrent(id string) error {
 	return err
 }
 
-// StopTorrent stops a torrent
+// StopTorrent halts downloading/seeding for an active torrent and emits EventTorrentStopped.
 func (m *Manager) StopTorrent(id string) error {
 	t := m.session.GetTorrent(id)
 	if t == nil {
@@ -140,7 +142,7 @@ func (m *Manager) StopTorrent(id string) error {
 	return err
 }
 
-// VerifyTorrent verifies a torrent's data
+// VerifyTorrent triggers a full piece hash check of the downloaded files on disk.
 func (m *Manager) VerifyTorrent(id string) error {
 	t := m.session.GetTorrent(id)
 	if t == nil {
@@ -149,7 +151,7 @@ func (m *Manager) VerifyTorrent(id string) error {
 	return t.Verify()
 }
 
-// AnnounceTorrent forces an announce to trackers
+// AnnounceTorrent manually triggers a scrape/announce to trackers for immediate peer discovery.
 func (m *Manager) AnnounceTorrent(id string) {
 	t := m.session.GetTorrent(id)
 	if t == nil {
@@ -158,7 +160,7 @@ func (m *Manager) AnnounceTorrent(id string) {
 	t.Announce()
 }
 
-// AddTracker adds a tracker to a torrent
+// AddTracker dynamically registers a new tracker URL to an existing torrent.
 func (m *Manager) AddTracker(id, url string) error {
 	t := m.session.GetTorrent(id)
 	if t == nil {
@@ -167,7 +169,7 @@ func (m *Manager) AddTracker(id, url string) error {
 	return t.AddTracker(url)
 }
 
-// AddPeer adds a peer to a torrent
+// AddPeer manually forces a connection attempt to a specific peer address.
 func (m *Manager) AddPeer(id, addr string) error {
 	t := m.session.GetTorrent(id)
 	if t == nil {
@@ -176,7 +178,7 @@ func (m *Manager) AddPeer(id, addr string) error {
 	return t.AddPeer(addr)
 }
 
-// GetPeers returns peers for a torrent
+// GetPeers retrieves a snapshot of all active peer connections for a given torrent.
 func (m *Manager) GetPeers(id string) ([]torrent.Peer, error) {
 	t := m.session.GetTorrent(id)
 	if t == nil {
@@ -185,7 +187,7 @@ func (m *Manager) GetPeers(id string) ([]torrent.Peer, error) {
 	return t.Peers(), nil
 }
 
-// StartAll starts all torrents
+// StartAll triggers start operations across all torrents in the session.
 func (m *Manager) StartAll() {
 	for _, t := range m.session.ListTorrents() {
 		err := t.Start()
@@ -198,7 +200,7 @@ func (m *Manager) StartAll() {
 	}
 }
 
-// StopAll stops all torrents
+// StopAll halts all active torrents in the session.
 func (m *Manager) StopAll() {
 	for _, t := range m.session.ListTorrents() {
 		err := t.Stop()
