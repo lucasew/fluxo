@@ -3,6 +3,7 @@ import { graphql } from 'relay-runtime';
 import { useParams, useNavigate } from 'react-router-dom';
 import { formatBytes, formatSpeed, formatTime } from '../utils/format';
 import { Play, Square, Trash2, ArrowLeft, Activity, File as FileIcon, Globe, HardDrive } from 'lucide-react';
+import { reportError } from '../utils/error';
 
 const TorrentDetailQuery = graphql`
   query TorrentDetailQuery($id: ID!) {
@@ -101,15 +102,28 @@ export default function TorrentDetail() {
         onCompleted: () => {
           navigate('/');
         },
+        onError: (err) => {
+          reportError(err, { source: 'TorrentDetailRemoveMutation', id });
+        }
       });
     }
   };
 
   const handleToggleStatus = () => {
     if (torrent?.status === 'STOPPED') {
-        commitStart({ variables: { id } });
+        commitStart({
+          variables: { id },
+          onError: (err) => {
+            reportError(err, { source: 'TorrentDetailStartMutation', id });
+          }
+        });
     } else {
-        commitStop({ variables: { id } });
+        commitStop({
+          variables: { id },
+          onError: (err) => {
+            reportError(err, { source: 'TorrentDetailStopMutation', id });
+          }
+        });
     }
   };
 
