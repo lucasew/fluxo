@@ -1,3 +1,4 @@
+import { reportError } from "../utils/error";
 import { useState, useCallback } from 'react';
 import { useMutation } from 'react-relay';
 import { graphql } from 'relay-runtime';
@@ -56,7 +57,7 @@ export default function AddTorrent() {
                 const parsed = await parseTorrent(buffer);
                 uriToAdd = toMagnetURI(parsed);
             } catch (err) {
-                console.error(err);
+                reportError(err);
                 throw new Error('Invalid .torrent file: ' + (err instanceof Error ? err.message : String(err)));
             }
         }
@@ -76,12 +77,14 @@ export default function AddTorrent() {
                 }
             },
             onError: (err) => {
+                reportError(err);
                 setIsProcessing(false);
                 setError(err.message);
             }
         });
 
     } catch (err: any) {
+        reportError(err);
         setIsProcessing(false);
         setError(err.message);
     }
