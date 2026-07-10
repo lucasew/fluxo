@@ -73,7 +73,7 @@ func (l *HTTPListener) Start(ctx context.Context) error {
 			// Check if file exists in FS
 			f, err := webFS.Open(strings.TrimPrefix(r.URL.Path, "/"))
 			if err == nil {
-				defer f.Close()
+				defer func() { _ = f.Close() }()
 				stat, err := f.Stat()
 				if err == nil && !stat.IsDir() {
 					fileServer.ServeHTTP(w, r)
@@ -90,7 +90,7 @@ func (l *HTTPListener) Start(ctx context.Context) error {
 					http.Error(w, "index.html not found", http.StatusInternalServerError)
 					return
 				}
-				defer index.Close()
+				defer func() { _ = index.Close() }()
 
 				// Get stat for ModTime
 				stat, err := index.Stat()
