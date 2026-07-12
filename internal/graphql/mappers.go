@@ -23,8 +23,12 @@ func MapTorrent(t *torrent.Torrent) *Torrent {
 		errStr = &msg
 	}
 
-	// Get files and trackers from torrent methods
-	files, _ := t.FileStats()
+	// Get files and trackers from torrent methods.
+	// FileStats fails when the torrent is not running; keep an empty list so the rest of the map still works.
+	files, err := t.FileStats()
+	if err != nil {
+		files = nil
+	}
 	trackers := t.Trackers()
 	webseeds := t.Webseeds()
 
@@ -122,9 +126,15 @@ func MapTrackers(trackers []torrent.Tracker) []*Tracker {
 		lastAnn := tr.LastAnnounce
 		nextAnn := tr.NextAnnounce
 
+		status := MapTrackerStatus(tr.Status)
+		// Prefer ERROR when the tracker carries an announce error, even if rain status lags.
+		if tr.Error != nil {
+			status = TrackerStatusError
+		}
+
 		result[i] = &Tracker{
 			URL:          tr.URL,
-			Status:       MapTrackerStatus(tr.Status),
+			Status:       status,
 			Leechers:     &leechers,
 			Seeders:      &seeders,
 			Error:        errStr,
@@ -135,11 +145,21 @@ func MapTrackers(trackers []torrent.Tracker) []*Tracker {
 	return result
 }
 
-// MapTrackerStatus converts Rain tracker status
+// MapTrackerStatus converts Rain tracker status to GraphQL TrackerStatus.
+// Working means a healthy announce succeeded; WAITING fits "waiting for the next announce".
 func MapTrackerStatus(status torrent.TrackerStatus) TrackerStatus {
-	// Rain TrackerStatus is just an int, map based on common patterns
-	// Since we don't have the exact constants, we'll use a simple mapping
-	return TrackerStatusIdle
+	switch status {
+	case torrent.NotContactedYet:
+		return TrackerStatusIdle
+	case torrent.Contacting:
+		return TrackerStatusAnnouncing
+	case torrent.Working:
+		return TrackerStatusWaiting
+	case torrent.NotWorking:
+		return TrackerStatusError
+	default:
+		return TrackerStatusIdle
+	}
 }
 
 // MapWebseeds converts Rain webseeds
@@ -153,10 +173,10 @@ func MapWebseeds(webseeds []torrent.Webseed) []*Webseed {
 		}
 
 		result[i] = &Webseed{
-			URL:              ws.URL,
-			DownloadSpeed:    ws.DownloadSpeed,
-			BytesDownloaded:  "0", // Not available in current API
-			Error:            errStr,
+			URL:             ws.URL,
+			DownloadSpeed:   ws.DownloadSpeed,
+			BytesDownloaded: "0", // Not available in current API
+			Error:           errStr,
 		}
 	}
 	return result
