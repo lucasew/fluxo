@@ -38,6 +38,9 @@ type TorrentConfig struct {
 	RPCHost                  string        `mapstructure:"rpc-host"`
 	RPCPort                  uint16        `mapstructure:"rpc-port"`
 	MaxOpenFiles             uint          `mapstructure:"max-open-files"`
+	PieceCacheSize           int64         `mapstructure:"piece-cache-size"`
+	ParallelMetadata         int           `mapstructure:"parallel-metadata"`
+	BlocklistEnabled         bool          `mapstructure:"blocklist-enabled"`
 	BlocklistURL             string        `mapstructure:"blocklist-url"`
 	ResumeWriteInterval      time.Duration `mapstructure:"resume-write-interval"`
 	HealthCheckInterval      time.Duration `mapstructure:"health-check-interval"`
@@ -69,6 +72,9 @@ func DefaultConfig() *Config {
 			RPCHost:                  "127.0.0.1",
 			RPCPort:                  7245,
 			MaxOpenFiles:             1024,
+			PieceCacheSize:           256 * 1024 * 1024,
+			ParallelMetadata:         2,
+			BlocklistEnabled:         false,
 			BlocklistURL:             "",
 			ResumeWriteInterval:      30 * time.Second,
 			HealthCheckInterval:      30 * time.Second,
@@ -94,6 +100,12 @@ func (c *TorrentConfig) ToRainConfig() *torrent.Config {
 	config.RPCHost = c.RPCHost
 	config.RPCPort = int(c.RPCPort)
 	config.MaxOpenFiles = uint64(c.MaxOpenFiles)
+	config.ReadCacheSize = c.PieceCacheSize
+	config.ParallelMetadataDownloads = c.ParallelMetadata
+	// Single --blocklist-enabled maps onto all three Rain blocklist gates.
+	config.BlocklistEnabledForTrackers = c.BlocklistEnabled
+	config.BlocklistEnabledForOutgoingConnections = c.BlocklistEnabled
+	config.BlocklistEnabledForIncomingConnections = c.BlocklistEnabled
 	config.BlocklistURL = c.BlocklistURL
 	config.ResumeWriteInterval = c.ResumeWriteInterval
 	config.HealthCheckInterval = c.HealthCheckInterval
