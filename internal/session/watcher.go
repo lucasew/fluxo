@@ -83,6 +83,18 @@ func (w *Watcher) check() {
 	})
 }
 
+// errorChanged reports whether two errors differ by presence or message
+// (interface != only compares identity).
+func errorChanged(a, b error) bool {
+	if a == nil && b == nil {
+		return false
+	}
+	if a == nil || b == nil {
+		return true
+	}
+	return a.Error() != b.Error()
+}
+
 // statsChanged compares two torrent stats for changes
 func statsChanged(old, new *torrent.Stats) bool {
 	// Compare key fields that change frequently
@@ -91,5 +103,5 @@ func statsChanged(old, new *torrent.Stats) bool {
 		old.Speed.Download != new.Speed.Download ||
 		old.Speed.Upload != new.Speed.Upload ||
 		old.Peers.Total != new.Peers.Total ||
-		old.Error != new.Error
+		errorChanged(old.Error, new.Error)
 }
