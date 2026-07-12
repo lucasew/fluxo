@@ -1,15 +1,15 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useMutation } from 'react-relay';
 import { graphql } from 'relay-runtime';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, Link as LinkIcon, FileText } from 'lucide-react';
-// @ts-ignore
+// @ts-expect-error parse-torrent has no bundled type declarations
 import parseTorrent, { toMagnetURI } from 'parse-torrent';
 import { Buffer } from 'buffer';
 
 // Ensure Buffer is available globally for parse-torrent if needed
 if (typeof window !== 'undefined') {
-    (window as any).Buffer = Buffer;
+    (window as Window & { Buffer?: typeof Buffer }).Buffer = Buffer;
 }
 
 const AddTorrentMutation = graphql`
@@ -56,7 +56,6 @@ export default function AddTorrent() {
                 const parsed = await parseTorrent(buffer);
                 uriToAdd = toMagnetURI(parsed);
             } catch (err) {
-                console.error(err);
                 throw new Error('Invalid .torrent file: ' + (err instanceof Error ? err.message : String(err)));
             }
         }
@@ -81,9 +80,9 @@ export default function AddTorrent() {
             }
         });
 
-    } catch (err: any) {
+    } catch (err: unknown) {
         setIsProcessing(false);
-        setError(err.message);
+        setError(err instanceof Error ? err.message : String(err));
     }
   };
 
