@@ -1,5 +1,6 @@
 import { useFragment, useMutation } from 'react-relay'
 import { graphql } from 'relay-runtime'
+import { formatSpeed } from '../utils/format'
 
 const TorrentCardFragment = graphql`
   fragment TorrentCard_torrent on Torrent {
@@ -47,12 +48,6 @@ function TorrentCard({ torrent }: Props) {
   const bytesCompleted = BigInt(data.bytesCompleted)
   const bytesTotal = BigInt(data.bytesTotal)
   const progress = bytesTotal > 0 ? Number((bytesCompleted * 100n) / bytesTotal) : 0
-
-  const formatSpeed = (bytesPerSec: number) => {
-    if (bytesPerSec < 1024) return `${bytesPerSec} B/s`
-    if (bytesPerSec < 1024 * 1024) return `${(bytesPerSec / 1024).toFixed(1)} KB/s`
-    return `${(bytesPerSec / 1024 / 1024).toFixed(1)} MB/s`
-  }
 
   const handleStart = () => {
     startTorrent({ variables: { id: data.id } })
