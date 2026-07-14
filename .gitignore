@@ -18,7 +18,7 @@ go.work
 vendor/
 
 # Build artifacts
-dist/
+/dist/
 build/
 
 # IDE
@@ -34,7 +34,8 @@ Thumbs.db
 
 # Frontend
 web/node_modules/
-web/dist/
+web/dist/*
+!web/dist/.gitkeep
 web/.vite/
 web/__generated__/
 
