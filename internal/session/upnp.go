@@ -2,6 +2,7 @@ package session
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -244,19 +245,19 @@ func (m *UPNPManager) addMapping(port int) error {
 		return fmt.Errorf("no UPnP clients available")
 	}
 
-	var lastErr error
+	var errs error
 	for _, client := range clients {
 		localIP, err := getLocalIPForClient(client)
 		if err != nil {
 			localIP, err = m.getLocalIP()
 			if err != nil {
-				lastErr = err
+				errs = errors.Join(errs, err)
 				continue
 			}
 		}
 
 		if err := client.AddPortMapping("", uint16(port), "TCP", uint16(port), localIP, true, "fluxo torrent", 0); err != nil {
-			lastErr = err
+			errs = errors.Join(errs, err)
 			log.Printf("UPnP: TCP map %d failed: %v", port, err)
 			continue
 		}
@@ -267,8 +268,8 @@ func (m *UPNPManager) addMapping(port int) error {
 		return nil
 	}
 
-	if lastErr != nil {
-		return fmt.Errorf("mapping failed on all devices: %w", lastErr)
+	if errs != nil {
+		return fmt.Errorf("mapping failed on all devices: %w", errs)
 	}
 	return fmt.Errorf("mapping failed on all devices")
 }
