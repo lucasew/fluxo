@@ -10,9 +10,12 @@ import {
 } from 'relay-runtime'
 import { createClient } from 'graphql-ws'
 
+// Match page scheme so subscriptions work behind HTTPS reverse proxies.
+const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+
 // WebSocket client for subscriptions
 const wsClient = createClient({
-  url: `ws://${window.location.host}/graphql`,
+  url: `${wsProtocol}//${window.location.host}/graphql`,
 })
 
 // HTTP fetch for queries and mutations
