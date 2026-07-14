@@ -224,7 +224,10 @@ func getLocalIPForClient(client *internetgateway2.WANIPConnection1) (string, err
 }
 
 
-// addMapping attempts to add a port mapping using UPnP
+// addMapping adds UPnP port mappings for peer traffic.
+// BitTorrent peer handshakes use TCP on the torrent listen port; UDP is also
+// mapped so µTP (and same-port DHT) keep working when the gateway allows it.
+// Success requires TCP; UDP failures are logged and ignored.
 func (m *UPNPManager) addMapping(port int) error {
 	// Wait for initial discovery to complete
 	select {
@@ -241,36 +244,43 @@ func (m *UPNPManager) addMapping(port int) error {
 		return fmt.Errorf("no UPnP clients available")
 	}
 
-	found := false
+	var lastErr error
 	for _, client := range clients {
 		localIP, err := getLocalIPForClient(client)
 		if err != nil {
 			localIP, err = m.getLocalIP()
 			if err != nil {
+				lastErr = err
 				continue
 			}
 		}
 
-		err = client.AddPortMapping("", uint16(port), "UDP", uint16(port), localIP, true, "fluxo torrent", 0)
-		if err == nil {
-			found = true
-			break
+		if err := client.AddPortMapping("", uint16(port), "TCP", uint16(port), localIP, true, "fluxo torrent", 0); err != nil {
+			lastErr = err
+			log.Printf("UPnP: TCP map %d failed: %v", port, err)
+			continue
 		}
+		if err := client.AddPortMapping("", uint16(port), "UDP", uint16(port), localIP, true, "fluxo torrent", 0); err != nil {
+			// TCP already mapped; UDP is best-effort.
+			log.Printf("UPnP: UDP map %d failed (TCP ok): %v", port, err)
+		}
+		return nil
 	}
 
-	if !found {
-		return fmt.Errorf("mapping failed on all devices")
+	if lastErr != nil {
+		return fmt.Errorf("mapping failed on all devices: %w", lastErr)
 	}
-	return nil
+	return fmt.Errorf("mapping failed on all devices")
 }
 
-// removeMapping attempts to remove a port mapping using UPnP
+// removeMapping removes TCP and UDP UPnP mappings for the port.
 func (m *UPNPManager) removeMapping(port int) error {
 	m.clientsMu.RLock()
 	clients := m.clients
 	m.clientsMu.RUnlock()
 
 	for _, client := range clients {
+		_ = client.DeletePortMapping("", uint16(port), "TCP")
 		_ = client.DeletePortMapping("", uint16(port), "UDP")
 	}
 	return nil
