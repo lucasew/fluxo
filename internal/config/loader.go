@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,9 +15,11 @@ import (
 func Load(cmd *cobra.Command) (*Config, error) {
 	v := viper.New()
 
+	explicitConfig := cmd.Flag("config").Value.String()
+
 	// Set config file search paths
-	if configFile := cmd.Flag("config").Value.String(); configFile != "" {
-		v.SetConfigFile(configFile)
+	if explicitConfig != "" {
+		v.SetConfigFile(explicitConfig)
 	} else {
 		v.SetConfigName("fluxo")
 		v.SetConfigType("yaml")
@@ -34,8 +37,17 @@ func Load(cmd *cobra.Command) (*Config, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	v.AutomaticEnv()
 
-	// Read config file (ignore error if not found)
-	_ = v.ReadInConfig()
+	// Read config file: missing optional search-path file is fine; parse errors
+	// and an explicit --config path that cannot be read must fail.
+	if err := v.ReadInConfig(); err != nil {
+		if explicitConfig != "" {
+			return nil, fmt.Errorf("reading config %q: %w", explicitConfig, err)
+		}
+		var notFound viper.ConfigFileNotFoundError
+		if !errors.As(err, &notFound) {
+			return nil, fmt.Errorf("reading config: %w", err)
+		}
+	}
 
 	// Bind command flags
 	if err := v.BindPFlags(cmd.Flags()); err != nil {
