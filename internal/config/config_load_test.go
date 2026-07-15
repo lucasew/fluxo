@@ -63,3 +63,55 @@ func TestLoadExplicitDatabaseOverride(t *testing.T) {
 		t.Errorf("DataDir = %q, want /tmp/dl", cfg.Torrent.DataDir)
 	}
 }
+
+func TestLoadMissingExplicitConfigErrors(t *testing.T) {
+	missing := filepath.Join(t.TempDir(), "no-such-fluxo.yaml")
+	cmd := &cobra.Command{Use: "fluxo"}
+	AddFlags(cmd)
+	if err := cmd.ParseFlags([]string{"--config", missing}); err != nil {
+		t.Fatal(err)
+	}
+	_, err := Load(cmd)
+	if err == nil {
+		t.Fatal("Load() error = nil, want error for missing --config file")
+	}
+}
+
+func TestLoadInvalidConfigErrors(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "fluxo.yaml")
+	// Unclosed quote → YAML parse failure (not "file not found")
+	if err := os.WriteFile(path, []byte("api-port: \"8080\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cmd := &cobra.Command{Use: "fluxo"}
+	AddFlags(cmd)
+	if err := cmd.ParseFlags([]string{"--config", path}); err != nil {
+		t.Fatal(err)
+	}
+	_, err := Load(cmd)
+	if err == nil {
+		t.Fatal("Load() error = nil, want error for invalid config YAML")
+	}
+}
+
+func TestLoadValidExplicitConfig(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "fluxo.yaml")
+	if err := os.WriteFile(path, []byte("api-port: 9090\napi-host: 0.0.0.0\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cmd := &cobra.Command{Use: "fluxo"}
+	AddFlags(cmd)
+	if err := cmd.ParseFlags([]string{"--config", path}); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load(cmd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.APIPort != 9090 {
+		t.Errorf("APIPort = %d, want 9090", cfg.APIPort)
+	}
+	if cfg.APIHost != "0.0.0.0" {
+		t.Errorf("APIHost = %q, want 0.0.0.0", cfg.APIHost)
+	}
+}
