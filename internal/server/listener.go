@@ -14,9 +14,11 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/websocket"
+	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/lucasew/fluxo/internal/config"
 	"github.com/lucasew/fluxo/internal/graphql"
@@ -142,23 +144,25 @@ func (l *HTTPListener) createSchema(resolver *graphql.Resolver) *handler.Server 
 	execSchema := graphql.NewExecutableSchema(graphql.Config{
 		Resolvers: resolver,
 	})
-	srv := handler.NewDefaultServer(execSchema)
+	// Build with handler.New: NewDefaultServer pre-registers a WebSocket transport,
+	// and gqlgen picks the first matching transport — so a later AddTransport(Websocket)
+	// never ran (keepalive/CheckOrigin were dead config).
+	srv := handler.New(execSchema)
 
-	// Add WebSocket transport for subscriptions
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 30 * time.Second,
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
-				return true // Allow all origins in dev mode
+				// Match existing CORS middleware (allow all); tighten later if needed.
+				return true
 			},
 		},
 	})
-
-	// Add other transports
-	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
 
-	// Add introspection
+	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
 	srv.Use(extension.Introspection{})
 
 	return srv
