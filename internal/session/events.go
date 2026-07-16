@@ -67,7 +67,10 @@ func (eb *EventBus) Unsubscribe(id string) {
 	}
 }
 
-// Publish sends an event to all subscribers (non-blocking)
+// Publish sends an event to all subscribers without blocking the publisher.
+// If a subscriber's buffer is full, the oldest buffered event is dropped so
+// the newest event is delivered. Preferring freshness avoids permanently
+// losing later signals (e.g. torrent_removed) behind a backlog of updates.
 func (eb *EventBus) Publish(event Event) {
 	eb.mu.RLock()
 	defer eb.mu.RUnlock()
@@ -76,7 +79,17 @@ func (eb *EventBus) Publish(event Event) {
 		select {
 		case ch <- event:
 		default:
-			// Skip if channel is full (non-blocking)
+			// Drop oldest to make room; a concurrent consumer may empty the
+			// channel between the failed send and the drain — still non-blocking.
+			select {
+			case <-ch:
+			default:
+			}
+			select {
+			case ch <- event:
+			default:
+				// Still full (racing with another Publish); skip this subscriber.
+			}
 		}
 	}
 }
