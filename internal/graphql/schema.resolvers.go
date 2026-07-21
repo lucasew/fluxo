@@ -80,6 +80,11 @@ func (r *mutationResolver) VerifyTorrent(ctx context.Context, id string) (bool, 
 
 // AnnounceTorrent implements mutation resolver
 func (r *mutationResolver) AnnounceTorrent(ctx context.Context, id string) (bool, error) {
+	// Manager.AnnounceTorrent is a no-op when the id is missing; match other
+	// mutations and surface not-found instead of returning a false success.
+	if _, err := r.manager.GetTorrent(id); err != nil {
+		return false, err
+	}
 	r.manager.AnnounceTorrent(id)
 	return true, nil
 }
@@ -114,7 +119,8 @@ func (r *queryResolver) Torrents(ctx context.Context) ([]*Torrent, error) {
 func (r *queryResolver) Torrent(ctx context.Context, id string) (*Torrent, error) {
 	t, err := r.manager.GetTorrent(id)
 	if err != nil {
-		return nil, fmt.Errorf("torrent not found: %w", err)
+		// GetTorrent already wraps ErrTorrentNotFound; do not double-prefix.
+		return nil, err
 	}
 	return MapTorrent(t), nil
 }
